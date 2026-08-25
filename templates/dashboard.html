@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="STUDYFLIP Dashboard — Your personalized learning overview.">
+    <title>Dashboard — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+</head>
+<body>
+
+    <!-- ── Sidebar Navigation ──────────────────────────── -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon">⚡</span>
+            <span class="sidebar-brand-text">STUDYFLIP</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard" class="sidebar-link active" id="nav-dashboard">
+                <span class="sidebar-icon">📊</span> Dashboard
+            </a></li>
+            <li><a href="/decks" class="sidebar-link" id="nav-decks">
+                <span class="sidebar-icon">📚</span> My Decks
+            </a></li>
+            <li><a href="/smart-review" class="sidebar-link" id="nav-review">
+                <span class="sidebar-icon">🧠</span> Smart Review
+            </a></li>
+            <li><a href="/mock-exam" class="sidebar-link" id="nav-exam">
+                <span class="sidebar-icon">📝</span> Mock Exams
+            </a></li>
+            <li><a href="/progress" class="sidebar-link" id="nav-progress">
+                <span class="sidebar-icon">📈</span> Progress
+            </a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
+                    <span class="sidebar-user-email">{{ user.email if user else '' }}</span>
+                </div>
+            </div>
+            <a href="/logout" class="sidebar-logout">
+                <span>🚪</span> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- ── Mobile top bar ──────────────────────────────── -->
+    <div class="mobile-topbar">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+        <span class="mobile-brand">⚡ STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout">🚪</a>
+    </div>
+
+    <!-- ── Main Content ────────────────────────────────── -->
+    <main class="main-content" id="app-main">
+
+        <!-- Welcome header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Welcome back, {{ user.name if user else 'Student' }} 👋</h1>
+                <p class="page-subtitle">Here's your learning overview. Keep up the great work!</p>
+            </div>
+            <div class="page-header-actions">
+                <a href="/mock-exam" class="btn btn-primary">📝 Take Mock Exam</a>
+                <a href="/decks" class="btn btn-ghost">+ New Deck</a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div id="stats-grid" class="stats-grid stats-grid--6">
+            <div class="stat-card stat-card--accent">
+                <div class="stat-icon">📚</div>
+                <div class="stat-value" id="stat-total-decks">—</div>
+                <div class="stat-label">Total Decks</div>
+            </div>
+            <div class="stat-card stat-card--success">
+                <div class="stat-icon">🃏</div>
+                <div class="stat-value" id="stat-total-cards">—</div>
+                <div class="stat-label">Total Flashcards</div>
+            </div>
+            <div class="stat-card stat-card--warning">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value" id="stat-mastered">—</div>
+                <div class="stat-label">Questions Mastered</div>
+            </div>
+            <div class="stat-card stat-card--accent">
+                <div class="stat-icon">📝</div>
+                <div class="stat-value" id="stat-exams">—</div>
+                <div class="stat-label">Mock Exams Done</div>
+            </div>
+            <div class="stat-card stat-card--success">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value" id="stat-avg-score">—</div>
+                <div class="stat-label">Avg Exam Score</div>
+            </div>
+            <div class="stat-card stat-card--danger">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value" id="stat-accuracy">—</div>
+                <div class="stat-label">Overall Accuracy</div>
+            </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="dashboard-grid">
+
+            <!-- Left column: Decks progress -->
+            <div class="dashboard-left">
+                <!-- Smart Review Banner -->
+                <div class="smart-review-card card-panel" id="smart-review-banner">
+                    <div class="smart-review-content">
+                        <div class="smart-review-header">
+                            <span class="smart-review-icon">🧠</span>
+                            <div>
+                                <h2 class="smart-review-title">Smart Review Queue</h2>
+                                <p class="smart-review-subtitle" id="smart-review-count-text">Calculating prioritized cards...</p>
+                            </div>
+                        </div>
+                        <p class="smart-review-description">
+                            Our <strong>Adaptive Review Prioritization</strong> algorithm focuses on your weakest cards first.
+                            <em>Your study queue is personalized based on your previous answers.</em>
+                        </p>
+                    </div>
+                    <div class="smart-review-action">
+                        <a href="/smart-review" class="btn btn-success btn-lg" style="box-shadow: var(--shadow-glow);">
+                            ⚡ Start Smart Review
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Deck progress cards -->
+                <div class="section-header">
+                    <h2>Continue Studying</h2>
+                    <a href="/decks" class="btn btn-ghost btn-sm">View All</a>
+                </div>
+                <div id="deck-breakdown-section">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your decks...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Weak areas + Recent activity -->
+            <div class="dashboard-right">
+
+                <!-- Mock Exam CTA -->
+                <div class="card-panel exam-cta-card">
+                    <div class="exam-cta-icon">📝</div>
+                    <h3>Ready for an exam?</h3>
+                    <p>Test your knowledge with a timed mock exam.</p>
+                    <a href="/mock-exam" class="btn btn-primary btn-full" style="margin-top:1rem;">Take Mock Exam</a>
+                </div>
+
+                <!-- Weak Areas -->
+                <div class="section-header" style="margin-top:1.5rem;">
+                    <h2>⚠️ Weak Areas</h2>
+                </div>
+                <div id="weak-areas-section" class="card-panel">
+                    <div class="loading">
+                        <div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div>
+                        <p>Analyzing performance...</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="section-header" style="margin-top:1.5rem;">
+                    <h2>📅 Recent Exams</h2>
+                    <a href="/progress" class="btn btn-ghost btn-sm">History</a>
+                </div>
+                <div id="recent-exams-section">
+                    <div class="loading">
+                        <div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div>
+                        <p>Loading activity...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/js/dashboard.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar--open');
+        }
+    </script>
+</body>
+</html>

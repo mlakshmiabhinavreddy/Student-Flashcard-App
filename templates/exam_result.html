@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Exam Results — STUDYFLIP. Review your performance.">
+    <title>Exam Results — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon">⚡</span>
+            <span class="sidebar-brand-text">STUDYFLIP</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a></li>
+            <li><a href="/decks" class="sidebar-link"><span class="sidebar-icon">📚</span> My Decks</a></li>
+            <li><a href="/smart-review" class="sidebar-link"><span class="sidebar-icon">🧠</span> Smart Review</a></li>
+            <li><a href="/mock-exam" class="sidebar-link active"><span class="sidebar-icon">📝</span> Mock Exams</a></li>
+            <li><a href="/progress" class="sidebar-link"><span class="sidebar-icon">📈</span> Progress</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
+                </div>
+            </div>
+            <a href="/logout" class="sidebar-logout"><span>🚪</span> Logout</a>
+        </div>
+    </nav>
+
+    <div class="mobile-topbar">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+        <span class="mobile-brand">⚡ STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout">🚪</a>
+    </div>
+
+    <main class="main-content" id="app-main">
+        <div id="result-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading results...</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        const EXAM_ID = {{ exam_id }};
+    </script>
+    <script src="/static/js/exam_result.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar--open');
+        }
+    </script>
+</body>
+</html>

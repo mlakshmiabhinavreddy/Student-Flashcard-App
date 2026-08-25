@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="My Decks — STUDYFLIP. Create and manage your flashcard decks.">
+    <title>My Decks — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon">⚡</span>
+            <span class="sidebar-brand-text">STUDYFLIP</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard" class="sidebar-link" id="nav-dashboard"><span class="sidebar-icon">📊</span> Dashboard</a></li>
+            <li><a href="/decks" class="sidebar-link active" id="nav-decks"><span class="sidebar-icon">📚</span> My Decks</a></li>
+            <li><a href="/smart-review" class="sidebar-link" id="nav-review"><span class="sidebar-icon">🧠</span> Smart Review</a></li>
+            <li><a href="/mock-exam" class="sidebar-link" id="nav-exam"><span class="sidebar-icon">📝</span> Mock Exams</a></li>
+            <li><a href="/progress" class="sidebar-link" id="nav-progress"><span class="sidebar-icon">📈</span> Progress</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
+                </div>
+            </div>
+            <a href="/logout" class="sidebar-logout"><span>🚪</span> Logout</a>
+        </div>
+    </nav>
+
+    <div class="mobile-topbar">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+        <span class="mobile-brand">⚡ STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout">🚪</a>
+    </div>
+
+    <main class="main-content" id="app-main">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">My Decks</h1>
+                <p class="page-subtitle">Create and manage your flashcard decks</p>
+            </div>
+            <button class="btn btn-primary" id="btn-create-deck" onclick="Decks.openCreateModal()">
+                + New Deck
+            </button>
+        </div>
+
+        <div id="decks-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading decks...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create / Edit Deck Modal -->
+    <div class="modal-overlay" id="deck-modal-overlay">
+        <div class="modal" role="dialog" aria-labelledby="deck-modal-title">
+            <h2 class="modal-title" id="deck-modal-title">New Deck</h2>
+            <form id="deck-form" onsubmit="Decks.handleSubmit(event)">
+                <input type="hidden" id="deck-form-id">
+                <div class="form-group">
+                    <label class="form-label" for="deck-form-name">Deck Name *</label>
+                    <input type="text" class="form-input" id="deck-form-name"
+                           placeholder="e.g. Python Programming" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="deck-form-subject">Subject</label>
+                    <input type="text" class="form-input" id="deck-form-subject"
+                           placeholder="e.g. Python, SQL, Mathematics">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="deck-form-desc">Description</label>
+                    <textarea class="form-input" id="deck-form-desc" rows="3"
+                              placeholder="What topics does this deck cover?"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" onclick="Decks.closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="deck-form-submit">Create Deck</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-deck-modal-overlay">
+        <div class="modal" role="alertdialog" aria-labelledby="delete-deck-title">
+            <h2 class="modal-title" id="delete-deck-title">Delete Deck</h2>
+            <p class="confirm-message">
+                Are you sure you want to delete <strong id="delete-deck-name"></strong>?
+                This will also delete all cards in this deck. This action cannot be undone.
+            </p>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="Decks.closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" id="btn-confirm-delete-deck" onclick="Decks.confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="/static/js/decks.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar--open');
+        }
+    </script>
+</body>
+</html>

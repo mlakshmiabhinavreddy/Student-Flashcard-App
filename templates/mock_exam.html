@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mock Exam — STUDYFLIP. Test your knowledge with timed mock exams.">
+    <title>Mock Exam — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon">⚡</span>
+            <span class="sidebar-brand-text">STUDYFLIP</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a></li>
+            <li><a href="/decks" class="sidebar-link"><span class="sidebar-icon">📚</span> My Decks</a></li>
+            <li><a href="/smart-review" class="sidebar-link"><span class="sidebar-icon">🧠</span> Smart Review</a></li>
+            <li><a href="/mock-exam" class="sidebar-link active"><span class="sidebar-icon">📝</span> Mock Exams</a></li>
+            <li><a href="/progress" class="sidebar-link"><span class="sidebar-icon">📈</span> Progress</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
+                </div>
+            </div>
+            <a href="/logout" class="sidebar-logout"><span>🚪</span> Logout</a>
+        </div>
+    </nav>
+
+    <div class="mobile-topbar">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+        <span class="mobile-brand">⚡ STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout">🚪</a>
+    </div>
+
+    <main class="main-content" id="app-main">
+
+        <!-- ── Exam Picker Screen ──────────────────────────── -->
+        <div id="exam-picker" class="exam-picker">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">📝 Mock Exams</h1>
+                    <p class="page-subtitle">Select a deck to start your timed mock exam</p>
+                </div>
+            </div>
+
+            <div id="picker-decks-container">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your decks...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Exam Config Screen ─────────────────────────── -->
+        <div id="exam-config" style="display:none;">
+            <a href="#" class="back-link" onclick="MockExam.showPicker(); return false;">← Back to Decks</a>
+            <div class="exam-config-card card-panel">
+                <div class="exam-config-icon">📝</div>
+                <h2 id="config-deck-name" class="exam-config-title"></h2>
+                <p id="config-deck-subject" class="exam-config-subject"></p>
+
+                <div class="exam-config-options">
+                    <div class="config-option">
+                        <label class="form-label" for="config-num-questions">Number of Questions</label>
+                        <select class="form-input" id="config-num-questions">
+                            <option value="5">5 Questions</option>
+                            <option value="10">10 Questions</option>
+                            <option value="15">15 Questions</option>
+                            <option value="20" selected>20 Questions</option>
+                            <option value="25">25 Questions</option>
+                            <option value="30">30 Questions</option>
+                        </select>
+                    </div>
+                    <div class="config-option">
+                        <label class="form-label" for="config-time-limit">Time Limit (minutes)</label>
+                        <select class="form-input" id="config-time-limit">
+                            <option value="5">5 Minutes</option>
+                            <option value="10">10 Minutes</option>
+                            <option value="15">15 Minutes</option>
+                            <option value="20" selected>20 Minutes</option>
+                            <option value="30">30 Minutes</option>
+                            <option value="45">45 Minutes</option>
+                            <option value="60">60 Minutes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="exam-config-info">
+                    <span>⏱️ Timed exam</span>
+                    <span>🎯 Auto-graded</span>
+                    <span>📊 Instant results</span>
+                </div>
+
+                <button class="btn btn-primary btn-lg" id="btn-start-exam" onclick="MockExam.startExam()">
+                    🚀 Start Exam
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Active Exam Screen ─────────────────────────── -->
+        <div id="exam-active" style="display:none;">
+            <!-- Exam header bar -->
+            <div class="exam-header-bar">
+                <div class="exam-header-info">
+                    <span class="exam-header-name" id="exam-header-name"></span>
+                    <span class="exam-question-count" id="exam-question-count"></span>
+                </div>
+                <div class="exam-timer" id="exam-timer">
+                    <span class="timer-icon">⏱️</span>
+                    <span id="timer-display">20:00</span>
+                </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="exam-progress-bar">
+                <div class="progress-bar-track" style="height:6px; border-radius:3px;">
+                    <div class="progress-bar-fill" id="exam-progress-fill" style="width:0%;transition:width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- Question card -->
+            <div class="exam-question-card card-panel" id="exam-question-card">
+                <div class="exam-question-label">QUESTION <span id="q-num">1</span> OF <span id="q-total">20</span></div>
+                <div class="exam-question-text" id="exam-question-text"></div>
+                <div class="exam-options" id="exam-options"></div>
+
+                <!-- I Know This — separate from answer options, visually distinct -->
+                <div style="margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid rgba(108,99,255,0.12); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
+                    <span style="font-size:0.8rem; color:var(--color-text-muted);">Don't want to answer? Mark as self-mastered:</span>
+                    <button class="btn-know-this" id="btn-know-this" onclick="MockExam.promptKnowThis()" title="Mark this question as known without answering (won't affect exam score)">
+                        💡 I Know This
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="exam-nav">
+                <button class="btn btn-ghost btn-lg" id="btn-prev" onclick="MockExam.prevQuestion()" disabled>
+                    ← Previous
+                </button>
+                <div class="exam-nav-center">
+                    <div class="exam-dots" id="exam-dots"></div>
+                </div>
+                <button class="btn btn-primary btn-lg" id="btn-next" onclick="MockExam.nextQuestion()">
+                    Next →
+                </button>
+                <button class="btn btn-success btn-lg" id="btn-submit" onclick="MockExam.confirmSubmit()" style="display:none;">
+                    ✓ Submit Exam
+                </button>
+            </div>
+
+            <!-- Dot legend -->
+            <div style="display:flex; gap:1.25rem; justify-content:center; margin-top:0.75rem; flex-wrap:wrap;">
+                <span style="font-size:0.75rem; color:var(--color-text-muted); display:flex; align-items:center; gap:0.35rem;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--color-bg-glass);border:1px solid var(--color-text-muted);display:inline-block;"></span> Unanswered
+                </span>
+                <span style="font-size:0.75rem; color:var(--color-success); display:flex; align-items:center; gap:0.35rem;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--color-accent);display:inline-block;"></span> Answered
+                </span>
+                <span style="font-size:0.75rem; color:var(--color-warning); display:flex; align-items:center; gap:0.35rem;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--color-warning);display:inline-block;"></span> Known (💡)
+                </span>
+                <span style="font-size:0.75rem; color:var(--color-warning); display:flex; align-items:center; gap:0.35rem;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--color-danger);display:inline-block;"></span> Current
+                </span>
+            </div>
+        </div>
+
+
+    </main>
+
+    <!-- Submit Confirmation Modal -->
+    <div class="modal-overlay" id="submit-modal-overlay">
+        <div class="modal" role="alertdialog">
+            <h2 class="modal-title">Submit Exam?</h2>
+            <p class="confirm-message" id="submit-confirm-msg">
+                Are you sure you want to submit? You have answered all questions.
+            </p>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="MockExam.closeSubmitModal()">Continue Exam</button>
+                <button class="btn btn-success" onclick="MockExam.submitExam()">Submit Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Up Modal -->
+    <div class="modal-overlay" id="timeout-modal-overlay">
+        <div class="modal" role="alertdialog">
+            <h2 class="modal-title">⏰ Time's Up!</h2>
+            <p class="confirm-message">Your time limit has been reached. The exam will be submitted automatically.</p>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="MockExam.submitExam()">View Results</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- I Know This Confirmation Modal -->
+    <div class="modal-overlay" id="know-this-modal-overlay">
+        <div class="modal" role="alertdialog">
+            <h2 class="modal-title">💡 Mark as Self-Mastered?</h2>
+            <p class="confirm-message" style="margin-bottom:0.75rem;">
+                <em id="know-this-question-text" style="color:var(--color-text-primary); font-style:normal; display:block; padding:0.75rem; background:var(--color-bg-primary); border-radius:6px; margin-bottom:1rem;"></em>
+                You're marking this question as <strong>known/self-mastered</strong>.
+            </p>
+            <div style="background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2); border-radius:6px; padding:0.875rem; margin-bottom:1rem; font-size:0.875rem;">
+                ⚠️ <strong>Important:</strong> This will <em>not</em> count as a correct answer in your exam score. It only updates your mastery record.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="MockExam.cancelKnowThis()">Cancel</button>
+                <button class="btn" style="background:var(--color-warning); color:#000; font-weight:700;" onclick="MockExam.confirmKnowThis()">💡 Confirm — I Know This</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="/static/js/mock_exam.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar--open');
+        }
+    </script>
+</body>
+</html>

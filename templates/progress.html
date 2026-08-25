@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Progress — STUDYFLIP. Track your learning journey and exam history.">
+    <title>Progress — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon">⚡</span>
+            <span class="sidebar-brand-text">STUDYFLIP</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a></li>
+            <li><a href="/decks" class="sidebar-link"><span class="sidebar-icon">📚</span> My Decks</a></li>
+            <li><a href="/smart-review" class="sidebar-link"><span class="sidebar-icon">🧠</span> Smart Review</a></li>
+            <li><a href="/mock-exam" class="sidebar-link"><span class="sidebar-icon">📝</span> Mock Exams</a></li>
+            <li><a href="/progress" class="sidebar-link active"><span class="sidebar-icon">📈</span> Progress</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
+                </div>
+            </div>
+            <a href="/logout" class="sidebar-logout"><span>🚪</span> Logout</a>
+        </div>
+    </nav>
+
+    <div class="mobile-topbar">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+        <span class="mobile-brand">⚡ STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout">🚪</a>
+    </div>
+
+    <main class="main-content" id="app-main">
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">📈 Progress & History</h1>
+                <p class="page-subtitle">Your complete learning record and performance analysis</p>
+            </div>
+            <a href="/mock-exam" class="btn btn-primary">Take New Exam</a>
+        </div>
+
+        <!-- Overall Performance Stats -->
+        <div class="section-header">
+            <h2>Overall Performance</h2>
+        </div>
+        <div id="progress-stats-grid" class="stats-grid stats-grid--6">
+            <div class="stat-card stat-card--accent">
+                <div class="stat-icon">📝</div>
+                <div class="stat-value" id="p-total-exams">—</div>
+                <div class="stat-label">Total Exams</div>
+            </div>
+            <div class="stat-card stat-card--success">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value" id="p-avg-score">—</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-card stat-card--warning">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value" id="p-best-score">—</div>
+                <div class="stat-label">Best Score</div>
+            </div>
+            <div class="stat-card stat-card--accent">
+                <div class="stat-icon">❓</div>
+                <div class="stat-value" id="p-questions">—</div>
+                <div class="stat-label">Questions Attempted</div>
+            </div>
+            <div class="stat-card stat-card--danger">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value" id="p-accuracy">—</div>
+                <div class="stat-label">Overall Accuracy</div>
+            </div>
+            <div class="stat-card stat-card--success">
+                <div class="stat-icon">🃏</div>
+                <div class="stat-value" id="p-mastered">—</div>
+                <div class="stat-label">Cards Mastered</div>
+            </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="progress-grid">
+
+            <!-- Left: Subject Performance + Weak Areas -->
+            <div class="progress-left">
+                <div class="section-header">
+                    <h2>Subject Performance</h2>
+                </div>
+                <div class="card-panel" id="subject-performance-section">
+                    <div class="loading">
+                        <div class="loading-spinner" style="width:24px;height:24px;border-width:2px;"></div>
+                        <p>Loading subject data...</p>
+                    </div>
+                </div>
+
+                <div class="section-header" style="margin-top:1.5rem;">
+                    <h2>⚠️ Weak Areas</h2>
+                </div>
+                <div class="card-panel" id="weak-areas-progress-section">
+                    <div class="loading">
+                        <div class="loading-spinner" style="width:24px;height:24px;border-width:2px;"></div>
+                        <p>Analyzing weak areas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Exam History -->
+            <div class="progress-right">
+                <div class="section-header">
+                    <h2>Exam History</h2>
+                </div>
+                <div id="exam-history-section">
+                    <div class="loading">
+                        <div class="loading-spinner" style="width:24px;height:24px;border-width:2px;"></div>
+                        <p>Loading history...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="/static/js/progress.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar--open');
+        }
+    </script>
+</body>
+</html>
