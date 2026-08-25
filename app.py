@@ -8,6 +8,7 @@ Run with:
 """
 
 import functools
+import os
 from datetime import datetime
 
 from flask import (
@@ -17,7 +18,7 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import Config
-from database import (
+from firestore_db import (
     init_db, query_db, execute_db,
     get_study_cards, get_smart_review_cards,
     record_response, calculate_priority,
@@ -1021,4 +1022,5 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=Config.DEBUG, port=5000)
+    port = int(os.getenv("PORT", 5000))
+    app.run(debug=Config.DEBUG, host="0.0.0.0", port=port)

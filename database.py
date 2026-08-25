@@ -30,21 +30,28 @@ CREATE TABLE IF NOT EXISTS users (
 -- ── Decks ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS decks (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL DEFAULT 1,
     name        TEXT    NOT NULL,
+    subject     TEXT    DEFAULT '',
     description TEXT    DEFAULT '',
     created_at  TEXT    DEFAULT (datetime('now'))
 );
 
 -- ── Cards ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS cards (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    deck_id       INTEGER NOT NULL,
-    question      TEXT    NOT NULL,
-    answer        TEXT    NOT NULL,
-    attempts      INTEGER DEFAULT 0,
-    correct_count INTEGER DEFAULT 0,
-    review_count  INTEGER DEFAULT 0,
-    created_at    TEXT    DEFAULT (datetime('now')),
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    deck_id        INTEGER NOT NULL,
+    question       TEXT    NOT NULL,
+    answer         TEXT    NOT NULL,
+    option_a       TEXT    DEFAULT NULL,
+    option_b       TEXT    DEFAULT NULL,
+    option_c       TEXT    DEFAULT NULL,
+    option_d       TEXT    DEFAULT NULL,
+    correct_option TEXT    DEFAULT NULL,
+    attempts       INTEGER DEFAULT 0,
+    correct_count  INTEGER DEFAULT 0,
+    review_count   INTEGER DEFAULT 0,
+    created_at     TEXT    DEFAULT (datetime('now')),
     FOREIGN KEY (deck_id) REFERENCES decks(id) ON DELETE CASCADE
 );
 
