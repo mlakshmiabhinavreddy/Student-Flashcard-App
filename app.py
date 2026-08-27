@@ -9,7 +9,10 @@ Run with:
 
 import functools
 import os
-from datetime import datetime
+from datetime import datetime, timezone
+import uuid
+
+from google.cloud import bigquery
 
 from flask import (
     Flask, render_template, request, jsonify,
@@ -19,11 +22,24 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import Config
 from firestore_db import (
-    init_db, query_db, execute_db,
+    init_db, query_db, execute_db, get_db,
     get_study_cards, get_smart_review_cards,
     record_response, calculate_priority,
     create_mock_exam, submit_mock_exam
 )
+
+
+# ── BigQuery configuration ─────────────────────────────────────
+# Your BigQuery project is: digital-flashcard-app
+# Environment variables still take priority when deployed elsewhere.
+BIGQUERY_PROJECT = (
+    os.getenv("GOOGLE_CLOUD_PROJECT")
+    or os.getenv("GCP_PROJECT")
+    or "digital-flashcard-app"
+)
+BIGQUERY_DATASET = os.getenv("BIGQUERY_DATASET", "studyflip_analytics")
+BIGQUERY_VIEW = os.getenv("BIGQUERY_VIEW", "adaptive_recommendations")
+BIGQUERY_LOCATION = os.getenv("BIGQUERY_LOCATION", "asia-south1")
 
 
 def create_app():
@@ -34,6 +50,22 @@ def create_app():
         template_folder="templates",
     )
     app.config.from_object(Config)
+
+    # BigQuery client is created lazily so the Flask app can still start
+    # when BigQuery credentials are not available.
+    bigquery_client = None
+
+    def get_bigquery_client():
+        """Create the BigQuery client only when it is first needed."""
+        nonlocal bigquery_client
+        if bigquery_client is None:
+            print(
+                f"[BIGQUERY] Connecting to "
+                f"{BIGQUERY_PROJECT}.{BIGQUERY_DATASET}.{BIGQUERY_VIEW}"
+            )
+            bigquery_client = bigquery.Client(project=BIGQUERY_PROJECT)
+            print(f"[BIGQUERY] Client ready for project: {BIGQUERY_PROJECT}")
+        return bigquery_client
 
     # Initialize the database on startup
     with app.app_context():
@@ -499,8 +531,9 @@ def create_app():
     @app.route("/api/study/<int:card_id>/respond", methods=["POST"])
     @login_required
     def api_study_respond(card_id):
-        """Record student response for a card."""
+        """Record student response and create an automatic analytics event."""
         user_id = session["user_id"]
+
         # Ownership check
         card = query_db("""
             SELECT c.* FROM cards c
@@ -512,7 +545,40 @@ def create_app():
 
         data = request.get_json(silent=True) or {}
         knew_it = bool(data.get("knew_it", False))
+
+        # Optional response time sent by the frontend, in seconds.
+        response_time = data.get("response_time")
+        try:
+            response_time = float(response_time) if response_time is not None else 0.0
+        except (TypeError, ValueError):
+            response_time = 0.0
+
+        # 1. Update the student's card progress.
         updated_card = record_response(card_id, knew_it)
+
+        # 2. Automatically create a Firestore study event.
+        #    This document is picked up by Eventarc/Cloud Run.
+        db = get_db()
+        if db is not None:
+            event_id = str(uuid.uuid4())
+
+            event_data = {
+                "event_id": event_id,
+                "user_id": str(user_id),
+                "deck_id": str(card.get("deck_id")),
+                "card_id": str(card_id),
+                "event_type": "card_response",
+                "correct": knew_it,
+                "response_time": response_time,
+                "timestamp": datetime.now(timezone.utc),
+            }
+
+            db.collection("study_events").document(event_id).set(event_data)
+            print(f"[ANALYTICS] Study event created: {event_id}")
+        else:
+            # Local SQLite mode: the Firestore analytics pipeline is not active.
+            print("[ANALYTICS] Firestore unavailable; study event was not created.")
+
         return jsonify(updated_card), 200
 
     @app.route("/api/smart-review/cards", methods=["GET"])
@@ -582,10 +648,10 @@ def create_app():
 
         # Aggregate totals
         total_decks = len(decks)
-        total_cards = sum(d["card_count"] for d in decks)
-        total_studied = sum(d["cards_studied"] for d in decks)
-        total_correct = sum(d["correct_count"] for d in decks)
-        total_attempts = sum(d["total_attempts"] for d in decks)
+        total_cards = sum((d.get("card_count", 0) or 0) for d in decks)
+        total_studied = sum((d.get("cards_studied", 0) or 0) for d in decks)
+        total_correct = sum((d.get("correct_count", 0) or 0) for d in decks)
+        total_attempts = sum((d.get("total_attempts", 0) or 0) for d in decks)
 
         # Cards mastered = correct_count > review_count AND attempts > 0
         mastered_row = query_db("""
@@ -600,18 +666,23 @@ def create_app():
 
         deck_list = []
         for d in decks:
-            acc = round((d["correct_count"] / d["total_attempts"]) * 100, 1) if d["total_attempts"] > 0 else 0
-            prog = round((d["cards_studied"] / d["card_count"]) * 100, 1) if d["card_count"] > 0 else 0
+            card_count = d.get("card_count", 0) or 0
+            cards_studied = d.get("cards_studied", 0) or 0
+            review_count = d.get("review_count", 0) or 0
+            correct_count = d.get("correct_count", 0) or 0
+            total_attempts = d.get("total_attempts", 0) or 0
+            acc = round((correct_count / total_attempts) * 100, 1) if total_attempts > 0 else 0
+            prog = round((cards_studied / card_count) * 100, 1) if card_count > 0 else 0
             deck_list.append({
-                "id": d["id"],
-                "name": d["name"],
-                "subject": d["subject"],
-                "description": d["description"],
-                "card_count": d["card_count"],
-                "cards_studied": d["cards_studied"],
-                "review_count": d["review_count"],
-                "correct_count": d["correct_count"],
-                "total_attempts": d["total_attempts"],
+                "id": d.get("id"),
+                "name": d.get("name", ""),
+                "subject": d.get("subject", ""),
+                "description": d.get("description", ""),
+                "card_count": card_count,
+                "cards_studied": cards_studied,
+                "review_count": review_count,
+                "correct_count": correct_count,
+                "total_attempts": total_attempts,
                 "accuracy": acc,
                 "progress": prog,
             })
@@ -629,6 +700,547 @@ def create_app():
             "decks": deck_list,
             "recent_exams": recent_exams,
         }), 200
+
+    # ═════════════════════════════════════════════════════════
+    #  ADAPTIVE RECOMMENDATIONS API (BigQuery)
+    # ═════════════════════════════════════════════════════════
+
+    @app.route("/api/adaptive-recommendations", methods=["GET"])
+    @login_required
+    def api_adaptive_recommendations():
+        """Return adaptive recommendations for the logged-in student.
+
+        BigQuery supplies the recommendation source and raw study_events
+        supply the actual response metrics.
+
+        Important ID rule:
+        - BigQuery deck_id is an analytics identifier.
+        - SQLite deck.id is the application's real deck identifier.
+        - The response exposes the real local deck_id when a local deck can
+          be resolved, while analytics_deck_id preserves the BigQuery ID.
+        """
+
+        user_id = str(session["user_id"]).strip()
+
+        print("=" * 70)
+        print("[ADAPTIVE] Loading recommendations")
+        print("[ADAPTIVE] Flask session user_id:", user_id)
+        print(
+            "[ADAPTIVE] BigQuery view:",
+            f"{BIGQUERY_PROJECT}.{BIGQUERY_DATASET}.{BIGQUERY_VIEW}"
+        )
+
+        recommendation_query = f"""
+            SELECT
+                user_id,
+                deck_id,
+                recommendation
+            FROM `{BIGQUERY_PROJECT}.{BIGQUERY_DATASET}.{BIGQUERY_VIEW}`
+            WHERE TRIM(CAST(user_id AS STRING)) = @user_id
+        """
+
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter(
+                    "user_id",
+                    "STRING",
+                    user_id
+                )
+            ]
+        )
+
+        def is_placeholder_deck_name(name, analytics_deck_id):
+            """Return True for automatically generated placeholder names."""
+            if not name:
+                return True
+
+            normalized = str(name).strip().lower()
+            analytics_id = str(analytics_deck_id).strip().lower()
+
+            placeholder_names = {
+                f"study deck {analytics_id}",
+                f"study deck - {analytics_id}",
+                f"study deck: {analytics_id}",
+            }
+
+            return normalized in placeholder_names
+
+        def get_user_decks():
+            """Return all decks owned by the current user."""
+            return query_db(
+                """
+                SELECT
+                    d.id,
+                    d.name,
+                    d.subject,
+                    d.description,
+                    d.created_at,
+                    COUNT(c.id) AS card_count
+                FROM decks d
+                LEFT JOIN cards c ON c.deck_id = d.id
+                WHERE d.user_id = ?
+                GROUP BY d.id
+                ORDER BY d.created_at DESC
+                """,
+                (session["user_id"],)
+            ) or []
+
+        try:
+            client = get_bigquery_client()
+
+            # ------------------------------------------------------------
+            # 1. Read all raw study events for this user.
+            # ------------------------------------------------------------
+            events_query = f"""
+                SELECT
+                    TRIM(CAST(deck_id AS STRING)) AS deck_id,
+                    COUNT(*) AS total_attempts,
+                    COUNTIF(correct = TRUE) AS correct_answers,
+                    AVG(SAFE_CAST(response_time AS FLOAT64))
+                        AS average_response_time,
+                    ARRAY_AGG(
+                        DISTINCT TRIM(CAST(card_id AS STRING))
+                        IGNORE NULLS
+                        LIMIT 100
+                    ) AS card_ids
+                FROM `{BIGQUERY_PROJECT}.{BIGQUERY_DATASET}.study_events`
+                WHERE TRIM(CAST(user_id AS STRING)) = @user_id
+                GROUP BY deck_id
+            """
+
+            event_rows = client.query(
+                events_query,
+                job_config=job_config,
+                location=BIGQUERY_LOCATION
+            ).result()
+
+            metrics_by_deck = {}
+
+            for row in event_rows:
+                analytics_deck_id = str(
+                    getattr(row, "deck_id", "") or ""
+                ).strip()
+
+                total_attempts = int(
+                    getattr(row, "total_attempts", 0) or 0
+                )
+
+                correct_answers = int(
+                    getattr(row, "correct_answers", 0) or 0
+                )
+
+                average_response_time = float(
+                    getattr(row, "average_response_time", 0) or 0
+                )
+
+                accuracy_percent = (
+                    round(
+                        (correct_answers / total_attempts) * 100,
+                        1
+                    )
+                    if total_attempts > 0
+                    else 0.0
+                )
+
+                raw_card_ids = getattr(row, "card_ids", None) or []
+
+                card_ids = [
+                    str(card_id).strip()
+                    for card_id in raw_card_ids
+                    if card_id is not None
+                    and str(card_id).strip()
+                ]
+
+                metrics_by_deck[analytics_deck_id] = {
+                    "total_attempts": total_attempts,
+                    "correct_answers": correct_answers,
+                    "accuracy_percent": accuracy_percent,
+                    "average_response_time": round(
+                        average_response_time,
+                        2
+                    ),
+                    "card_ids": card_ids,
+                }
+
+            print(
+                "[ADAPTIVE] Raw BigQuery events:",
+                len(metrics_by_deck),
+                "deck(s)"
+            )
+
+            # ------------------------------------------------------------
+            # 2. Read recommendation rows from the existing view.
+            # ------------------------------------------------------------
+            view_rows = client.query(
+                recommendation_query,
+                job_config=job_config,
+                location=BIGQUERY_LOCATION
+            ).result()
+
+            recommendations = []
+
+            # Cache the user's local decks once instead of querying the
+            # database repeatedly for every recommendation.
+            user_decks = get_user_decks()
+
+            print(
+                "[ADAPTIVE] Local decks:",
+                [
+                    {
+                        "id": d.get("id"),
+                        "name": d.get("name"),
+                        "card_count": d.get("card_count", 0)
+                    }
+                    for d in user_decks
+                ]
+            )
+
+            for row in view_rows:
+                row_user_id = getattr(row, "user_id", None)
+
+                analytics_deck_id = str(
+                    getattr(row, "deck_id", "") or ""
+                ).strip()
+
+                metrics = metrics_by_deck.get(
+                    analytics_deck_id,
+                    {
+                        "total_attempts": 0,
+                        "correct_answers": 0,
+                        "accuracy_percent": 0.0,
+                        "average_response_time": 0.0,
+                        "card_ids": [],
+                    }
+                )
+
+                recommendation = str(
+                    getattr(row, "recommendation", "") or ""
+                ).strip()
+
+                if not recommendation:
+                    accuracy = metrics["accuracy_percent"]
+
+                    if accuracy < 60:
+                        recommendation = "Review this deck again"
+                    elif accuracy < 80:
+                        recommendation = "Practice this deck more"
+                    else:
+                        recommendation = (
+                            "Good performance - continue to next level"
+                        )
+
+                local_deck = None
+
+                # --------------------------------------------------------
+                # 3. First try exact local deck ID.
+                # --------------------------------------------------------
+                try:
+                    possible_local_id = int(analytics_deck_id)
+
+                    local_deck = query_db(
+                        """
+                        SELECT
+                            d.id,
+                            d.name,
+                            d.subject,
+                            d.description
+                        FROM decks d
+                        WHERE d.id = ?
+                          AND d.user_id = ?
+                        LIMIT 1
+                        """,
+                        (
+                            possible_local_id,
+                            session["user_id"]
+                        ),
+                        one=True
+                    )
+
+                    if local_deck:
+                        print(
+                            "[ADAPTIVE] Exact ID mapping:",
+                            analytics_deck_id,
+                            "->",
+                            local_deck.get("id"),
+                            local_deck.get("name")
+                        )
+
+                except (TypeError, ValueError):
+                    local_deck = None
+
+                # --------------------------------------------------------
+                # 4. If IDs differ, try mapping an analytics card ID to
+                #    the local cards table.
+                # --------------------------------------------------------
+                if local_deck is None:
+                    for analytics_card_id in metrics["card_ids"]:
+
+                        candidates = []
+
+                        # SQLite may receive the card ID as either text
+                        # or integer depending on the database adapter.
+                        candidates.append(analytics_card_id)
+
+                        try:
+                            candidates.append(int(analytics_card_id))
+                        except (TypeError, ValueError):
+                            pass
+
+                        for candidate_card_id in candidates:
+                            try:
+                                local_deck = query_db(
+                                    """
+                                    SELECT
+                                        d.id,
+                                        d.name,
+                                        d.subject,
+                                        d.description
+                                    FROM cards c
+                                    JOIN decks d
+                                        ON d.id = c.deck_id
+                                    WHERE c.id = ?
+                                      AND d.user_id = ?
+                                    LIMIT 1
+                                    """,
+                                    (
+                                        candidate_card_id,
+                                        session["user_id"]
+                                    ),
+                                    one=True
+                                )
+                            except Exception as card_error:
+                                print(
+                                    "[ADAPTIVE] Card mapping failed for",
+                                    analytics_card_id,
+                                    ":",
+                                    card_error
+                                )
+                                local_deck = None
+
+                            if local_deck:
+                                print(
+                                    "[ADAPTIVE] Card mapping:",
+                                    "analytics deck",
+                                    analytics_deck_id,
+                                    "-> local deck",
+                                    local_deck.get("id"),
+                                    local_deck.get("name")
+                                )
+                                break
+
+                        if local_deck:
+                            break
+
+                # --------------------------------------------------------
+                # 5. IMPORTANT FIX:
+                #
+                # If the exact/card mapping points to an automatically
+                # generated "Study Deck <analytics-id>" placeholder,
+                # prefer a real user-created deck instead.
+                #
+                # This handles the situation where:
+                #
+                #   BigQuery deck = 1787759954631
+                #   local generated deck name =
+                #       Study Deck 1787759954631
+                #
+                # while the real deck has a meaningful name such as:
+                #   Python Fundamentals - Mock Exam 1
+                # --------------------------------------------------------
+                if local_deck is not None and is_placeholder_deck_name(
+                    local_deck.get("name"),
+                    analytics_deck_id
+                ):
+                    real_named_decks = [
+                        deck
+                        for deck in user_decks
+                        if not is_placeholder_deck_name(
+                            deck.get("name"),
+                            analytics_deck_id
+                        )
+                    ]
+
+                    if len(real_named_decks) == 1:
+                        print(
+                            "[ADAPTIVE] Replacing generated placeholder:",
+                            local_deck.get("name"),
+                            "->",
+                            real_named_decks[0].get("name")
+                        )
+                        local_deck = real_named_decks[0]
+
+                # --------------------------------------------------------
+                # 6. If there is exactly one local deck, it is safe to use
+                #    it when BigQuery and SQLite IDs were generated
+                #    independently.
+                # --------------------------------------------------------
+                if local_deck is None and len(user_decks) == 1:
+                    local_deck = user_decks[0]
+
+                    print(
+                        "[ADAPTIVE] Single-deck fallback:",
+                        analytics_deck_id,
+                        "->",
+                        local_deck.get("id"),
+                        local_deck.get("name")
+                    )
+
+                # --------------------------------------------------------
+                # 7. If there are multiple local decks and the current
+                #    mapping failed, prefer a real named deck over a
+                #    generated placeholder only when there is exactly one
+                #    such real deck.
+                # --------------------------------------------------------
+                if local_deck is None and len(user_decks) > 1:
+                    real_named_decks = [
+                        deck
+                        for deck in user_decks
+                        if not is_placeholder_deck_name(
+                            deck.get("name"),
+                            analytics_deck_id
+                        )
+                    ]
+
+                    if len(real_named_decks) == 1:
+                        local_deck = real_named_decks[0]
+
+                        print(
+                            "[ADAPTIVE] Real-name fallback:",
+                            analytics_deck_id,
+                            "->",
+                            local_deck.get("id"),
+                            local_deck.get("name")
+                        )
+                    else:
+                        print(
+                            "[ADAPTIVE] Could not safely map analytics "
+                            f"deck {analytics_deck_id}; "
+                            f"user has {len(user_decks)} local decks."
+                        )
+
+                # --------------------------------------------------------
+                # 8. Build the URL and DISPLAY NAME from the real local
+                #    deck. Never use the analytics ID as the Study URL.
+                # --------------------------------------------------------
+                local_deck_id = None
+                deck_name = None
+                study_url = None
+
+                if local_deck:
+                    local_deck_id = local_deck.get("id")
+                    deck_name = (
+                        local_deck.get("name")
+                        or ""
+                    ).strip()
+
+                    if local_deck_id is not None:
+                        try:
+                            study_url = url_for(
+                                "study_page",
+                                deck_id=int(local_deck_id)
+                            )
+                        except (TypeError, ValueError):
+                            study_url = None
+
+                # If there is no safe mapping, keep the analytics ID as
+                # analytics_deck_id only. Do not pretend it is a real
+                # local deck ID.
+                if not deck_name:
+                    deck_name = (
+                        f"Study Deck {analytics_deck_id}"
+                        if analytics_deck_id
+                        else "Recommended Deck"
+                    )
+
+                # Use the REAL local ID when resolved. This fixes the
+                # previous response where deck_id and study_url referred
+                # to different identifiers.
+                response_deck_id = (
+                    str(local_deck_id)
+                    if local_deck_id is not None
+                    else analytics_deck_id
+                )
+
+                recommendations.append({
+                    "user_id": (
+                        str(row_user_id)
+                        if row_user_id is not None
+                        else user_id
+                    ),
+
+                    # BigQuery/analytics identifier retained for debugging
+                    # and traceability.
+                    "analytics_deck_id": analytics_deck_id,
+
+                    # Real StudyFlip deck identifier when resolved.
+                    "deck_id": response_deck_id,
+
+                    # Real local deck name.
+                    "deck_name": deck_name,
+
+                    # Real local StudyFlip URL.
+                    "study_url": study_url,
+
+                    "total_attempts": metrics["total_attempts"],
+                    "correct_answers": metrics["correct_answers"],
+                    "accuracy_percent": metrics["accuracy_percent"],
+                    "average_response_time": metrics[
+                        "average_response_time"
+                    ],
+                    "recommendation": recommendation,
+                })
+
+            # ------------------------------------------------------------
+            # 9. Weakest deck first.
+            # ------------------------------------------------------------
+            recommendations.sort(
+                key=lambda item: (
+                    item["accuracy_percent"],
+                    -item["total_attempts"]
+                )
+            )
+
+            best_action = (
+                recommendations[0]
+                if recommendations
+                else None
+            )
+
+            response = {
+                "success": True,
+                "user_id": user_id,
+                "recommendations": recommendations,
+                "best_recommendation": best_action,
+                "count": len(recommendations),
+            }
+
+            print("[ADAPTIVE] Final response:")
+            print(response)
+            print("=" * 70)
+
+            result = jsonify(response)
+            result.headers["Cache-Control"] = (
+                "no-store, no-cache, must-revalidate, max-age=0"
+            )
+
+            return result, 200
+
+        except Exception as e:
+            print(
+                "[BIGQUERY] Adaptive recommendation query failed:",
+                repr(e)
+            )
+
+            return jsonify({
+                "success": False,
+                "user_id": user_id,
+                "recommendations": [],
+                "best_recommendation": None,
+                "count": 0,
+                "error": "Unable to load adaptive recommendations"
+            }), 503
+
+
 
     # ═════════════════════════════════════════════════════════
     #  MOCK EXAM API

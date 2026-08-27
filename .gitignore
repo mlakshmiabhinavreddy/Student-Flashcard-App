@@ -12,11 +12,11 @@ env/
 # Environment
 .env
 
-# Google Cloud credentials
+# Database
+*.d# Google Cloud credentials
 firebase-service-account.json
 
-# Database
-*.db
+b
 
 # IDE
 .vscode/
