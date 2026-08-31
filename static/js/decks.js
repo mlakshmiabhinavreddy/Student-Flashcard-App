@@ -190,6 +190,181 @@ const Decks = (() => {
         }
     }
 
+        // ═════════════════════════════════════════════════════════
+    //  CLOUD STORAGE
+    // ═════════════════════════════════════════════════════════
+
+    async function loadStorageFiles() {
+        const container = document.getElementById(
+            "storage-files-container"
+        );
+
+        if (!container) return;
+
+        try {
+            const files = await api(
+                "GET",
+                "/api/storage/files"
+            );
+
+            if (!files.files || files.files.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:1.5rem;">
+                        <span class="empty-state-icon">☁️</span>
+                        <h3>No files yet</h3>
+                        <p>Upload your first study material above.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div style="display:flex;flex-direction:column;gap:0.65rem;">
+            `;
+
+            for (const objectName of files.files) {
+                const safeObjectName = encodeURIComponent(
+                    objectName
+                );
+
+                const filename = objectName
+                    .split("/")
+                    .pop();
+
+                html += `
+                    <div
+                        style="
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            gap:1rem;
+                            padding:0.85rem 1rem;
+                            border:1px solid var(--border-color);
+                            border-radius:0.75rem;
+                        "
+                    >
+                        <div style="min-width:0;">
+                            <span>📄</span>
+                            <strong>
+                                ${escapeHtml(filename)}
+                            </strong>
+                        </div>
+
+                        <a
+                            class="btn btn-ghost btn-sm"
+                            href="/api/storage/download/${safeObjectName}"
+                        >
+                            ⬇️ Download
+                        </a>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+
+            container.innerHTML = html;
+
+        } catch (err) {
+            console.error(
+                "Load storage files error:",
+                err
+            );
+
+            container.innerHTML = `
+                <p class="text-muted">
+                    Unable to load your files.
+                </p>
+            `;
+
+            showToast(
+                "Failed to load Cloud Storage files",
+                "error"
+            );
+        }
+    }
+
+
+    async function handleStorageUpload(event) {
+        event.preventDefault();
+
+        const input = document.getElementById(
+            "storage-file-input"
+        );
+
+        const button = document.getElementById(
+            "storage-upload-btn"
+        );
+
+        const status = document.getElementById(
+            "storage-upload-status"
+        );
+
+        if (!input || !input.files.length) {
+            showToast(
+                "Please choose a file first",
+                "error"
+            );
+            return;
+        }
+
+        const file = input.files[0];
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        button.disabled = true;
+        button.textContent = "Uploading...";
+
+        status.textContent =
+            `Uploading ${file.name}...`;
+
+        try {
+            const response = await fetch(
+                "/api/storage/upload",
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            showToast(
+                "File uploaded successfully",
+                "success"
+            );
+
+            status.textContent =
+                `${file.name} uploaded successfully.`;
+
+            input.value = "";
+
+            await loadStorageFiles();
+
+        } catch (err) {
+            console.error(
+                "Storage upload error:",
+                err
+            );
+
+            const message =
+                err.error ||
+                "File upload failed";
+
+            showToast(message, "error");
+
+            status.textContent = message;
+
+        } finally {
+            button.disabled = false;
+            button.textContent = "☁️ Upload File";
+        }
+    }
+
     // ── Utilities ───────────────────────────────────────────
     function escapeHtml(text) {
         const div = document.createElement("div");
@@ -202,8 +377,21 @@ const Decks = (() => {
     }
 
     // ── Close modals on overlay click ───────────────────────
-    document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", () => {
         loadDecks();
+        loadStorageFiles();
+
+        const storageUploadForm =
+            document.getElementById(
+                "storage-upload-form"
+            );
+
+        if (storageUploadForm) {
+            storageUploadForm.addEventListener(
+                "submit",
+                handleStorageUpload
+            );
+        }
 
         // Click outside modal to close
         document.getElementById("deck-modal-overlay").addEventListener("click", (e) => {
@@ -223,7 +411,7 @@ const Decks = (() => {
     });
 
     // ── Public API ──────────────────────────────────────────
-    return {
+        return {
         loadDecks,
         openDeck,
         openCreateModal,
@@ -233,5 +421,7 @@ const Decks = (() => {
         openDeleteModal,
         closeDeleteModal,
         confirmDelete,
+        loadStorageFiles,
+        handleStorageUpload,
     };
 })();

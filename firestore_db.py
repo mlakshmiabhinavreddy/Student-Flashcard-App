@@ -1568,6 +1568,7 @@ def query_db(query, args=(), one=False):
     elif (
         "c.correct_count > c.review_count" in q
         and "c.attempts > 0" in q
+        and "COUNT(*) AS cnt" in q
     ):
 
         user_id = args[0]

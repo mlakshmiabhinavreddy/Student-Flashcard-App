@@ -13,10 +13,12 @@ env/
 .env
 
 # Database
-*.d# Google Cloud credentials
-firebase-service-account.json
+*.db
+*.sqlite
+*.sqlite3
 
-b
+# Google Cloud credentials
+firebase-service-account.json
 
 # IDE
 .vscode/
@@ -29,4 +31,9 @@ Thumbs.db
 # Logs
 *.log
 
-.env.example
+# Local testing / generated files
+cloud-run-storage-test.txt
+storage-test.txt
+storage-test-downloaded.txt
+dashboard-current.json
+monitoring-dashboard-update.json

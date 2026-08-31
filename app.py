@@ -14,10 +14,18 @@ import uuid
 
 from google.cloud import bigquery
 
+from storage_service import (
+    upload_file,
+    download_file,
+    delete_file,
+    list_files,
+)
+
 from flask import (
     Flask, render_template, request, jsonify,
-    session, redirect, url_for
+    session, redirect, url_for, send_file
 )
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import Config
@@ -1626,7 +1634,174 @@ def create_app():
             "weak_cards": weak_card_list,
             "weak_subjects": weak_subject_list,
         }), 200
+    
+        # ═════════════════════════════════════════════════════════
+    #  CLOUD STORAGE API
+    # ═════════════════════════════════════════════════════════
 
+    @app.route("/api/storage/upload", methods=["POST"])
+    @login_required
+    def api_storage_upload():
+        """
+        Upload a study material file to Cloud Storage.
+
+        Files are isolated by user:
+            users/<user_id>/files/<filename>
+        """
+
+        user_id = str(session["user_id"])
+
+        if "file" not in request.files:
+            return jsonify({
+                "error": "No file provided"
+            }), 400
+
+        file = request.files["file"]
+
+        if not file or not file.filename:
+            return jsonify({
+                "error": "No filename provided"
+            }), 400
+
+        # Prevent directory traversal and unsafe paths.
+        original_filename = os.path.basename(
+            file.filename
+        ).strip()
+
+        if not original_filename:
+            return jsonify({
+                "error": "Invalid filename"
+            }), 400
+
+        # Generate a unique name so repeated uploads
+        # don't overwrite each other.
+        extension = os.path.splitext(
+            original_filename
+        )[1].lower()
+
+        unique_name = (
+            f"{uuid.uuid4().hex}"
+            f"{extension}"
+        )
+
+        object_name = (
+            f"users/{user_id}/files/{unique_name}"
+        )
+
+        try:
+            uploaded_name = upload_file(
+                file,
+                object_name,
+                file.content_type
+            )
+
+            return jsonify({
+                "message": "File uploaded successfully",
+                "filename": original_filename,
+                "object_name": uploaded_name,
+                "bucket": "digital-flashcard-app-files-2026",
+            }), 201
+
+        except Exception as exc:
+            print(
+                f"[STORAGE] Upload failed: {exc}"
+            )
+
+            return jsonify({
+                "error": "File upload failed"
+            }), 500
+
+
+    @app.route(
+        "/api/storage/download/<path:object_name>",
+        methods=["GET"]
+    )
+    @login_required
+    def api_storage_download(object_name):
+        """
+        Download a user's own file from Cloud Storage.
+        """
+
+        user_id = str(session["user_id"])
+
+        expected_prefix = (
+            f"users/{user_id}/files/"
+        )
+
+        # Security: users may only download files
+        # belonging to their own storage namespace.
+        if not object_name.startswith(
+            expected_prefix
+        ):
+            return jsonify({
+                "error": "Access denied"
+            }), 403
+
+        try:
+            file_data, content_type = download_file(
+                object_name
+            )
+
+            filename = os.path.basename(
+                object_name
+            )
+
+            from io import BytesIO
+
+            return send_file(
+                BytesIO(file_data),
+                mimetype=content_type,
+                as_attachment=True,
+                download_name=filename
+            )
+
+        except FileNotFoundError:
+            return jsonify({
+                "error": "File not found"
+            }), 404
+
+        except Exception as exc:
+            print(
+                f"[STORAGE] Download failed: {exc}"
+            )
+
+            return jsonify({
+                "error": "File download failed"
+            }), 500
+
+
+    @app.route(
+        "/api/storage/files",
+        methods=["GET"]
+    )
+    @login_required
+    def api_storage_files():
+        """
+        List the current user's files.
+        """
+
+        user_id = str(session["user_id"])
+
+        prefix = (
+            f"users/{user_id}/files/"
+        )
+
+        try:
+            files = list_files(prefix)
+
+            return jsonify({
+                "files": files
+            }), 200
+
+        except Exception as exc:
+            print(
+                f"[STORAGE] Listing failed: {exc}"
+            )
+
+            return jsonify({
+                "error": "Could not list files"
+            }), 500
+        
     return app
 
 

@@ -58,6 +58,60 @@
                 <p>Loading decks...</p>
             </div>
         </div>
+
+                <!-- Cloud Storage -->
+        <section class="card-panel" id="cloud-storage-section" style="margin-top: 2rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+                <div>
+                    <h2 style="margin:0;">☁️ Cloud Storage</h2>
+                    <p class="page-subtitle" style="margin:0.35rem 0 0;">
+                        Store your study materials securely in Google Cloud.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top:1.25rem;">
+                <form id="storage-upload-form">
+                    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                        <input
+                            type="file"
+                            id="storage-file-input"
+                            class="form-input"
+                            style="max-width:400px;"
+                            required
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="storage-upload-btn"
+                        >
+                            ☁️ Upload File
+                        </button>
+                    </div>
+
+                    <p
+                        id="storage-upload-status"
+                        class="text-muted"
+                        style="margin-top:0.5rem;"
+                    ></p>
+                </form>
+            </div>
+
+            <div style="margin-top:1.5rem;">
+                <h3 style="margin-bottom:0.75rem;">Your Files</h3>
+
+                <div id="storage-files-container">
+                    <div class="loading">
+                        <div
+                            class="loading-spinner"
+                            style="width:20px;height:20px;border-width:2px;"
+                        ></div>
+                        <p>Loading files...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Create / Edit Deck Modal -->
