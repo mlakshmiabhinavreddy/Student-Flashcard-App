@@ -1,0 +1,59 @@
+name: Flashcard App CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Set test environment variables
+        run: |
+          echo "SECRET_KEY=test-secret-key-for-ci" >> $GITHUB_ENV
+          echo "FLASK_ENV=testing" >> $GITHUB_ENV
+          echo "FLASK_DEBUG=0" >> $GITHUB_ENV
+
+      - name: Run database tests
+        run: |
+          python test_database.py
+
+      - name: Start Flask application
+        run: |
+          python app.py &
+          sleep 5
+
+      - name: Run API tests
+        run: |
+          python test_api.py
+
+      - name: Run security and reliability tests
+        run: |
+          python test_security_reliability.py
+
+      - name: Run complete scenario tests
+        run: |
+          python test_all_scenarios.py
+
+      - name: Run frontend tests
+        run: |
+          python test_frontend.py
