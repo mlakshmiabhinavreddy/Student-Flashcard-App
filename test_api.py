@@ -10,22 +10,28 @@ Run:
 import json
 import urllib.request
 import urllib.error
+import http.cookiejar
 import sys
 
 BASE = "http://127.0.0.1:5000"
 PASS = 0
 FAIL = 0
-
+# Store Flask session cookies between API requests
+cookie_jar = http.cookiejar.CookieJar()
+opener = urllib.request.build_opener(
+    urllib.request.HTTPCookieProcessor(cookie_jar)
+)
 
 def api(method, path, body=None):
     """Make an API request and return (status_code, response_dict)."""
     url = f"{BASE}{path}"
     data = json.dumps(body).encode() if body else None
+
     req = urllib.request.Request(url, data=data, method=method)
     req.add_header("Content-Type", "application/json")
 
     try:
-        resp = urllib.request.urlopen(req)
+        resp = opener.open(req)
         return resp.status, json.loads(resp.read())
     except urllib.error.HTTPError as e:
         return e.code, json.loads(e.read())
@@ -43,11 +49,41 @@ def check(label, condition):
 
 def main():
     global PASS, FAIL
+        # ── Authenticate test user ───────────────────────────────
+    print("\n0. Authentication - Register test user")
 
+    test_email = "api-test@example.com"
+    test_password = "testpassword123"
+
+    status, data = api(
+        "POST",
+        "/api/auth/register",
+        {
+            "name": "API Test User",
+            "email": test_email,
+            "password": test_password,
+            "confirm_password": test_password
+        }
+    )
+
+    # If the user already exists, log in instead
+    if status == 409:
+        status, data = api(
+            "POST",
+            "/api/auth/login",
+            {
+                "email": test_email,
+                "password": test_password
+            }
+        )
+
+    check("authentication successful", status in (200, 201))
     # ── 1. DECK: Create ─────────────────────────────────────
     print("\n1. POST /api/decks — Create deck")
 
     status, data = api("POST", "/api/decks", {"name": "Biology 101", "description": "Cell biology"})
+    print("DEBUG STATUS:", status)
+    print("DEBUG RESPONSE:", data)
     check(f"status=201", status == 201)
     check("returns deck with id", "id" in data)
     check("name matches", data["name"] == "Biology 101")

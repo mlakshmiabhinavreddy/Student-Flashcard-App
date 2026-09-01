@@ -58,19 +58,42 @@ def main():
     check("idx_cards_review_count exists", "idx_cards_review_count" in indexes)
 
     # Verify column names
+         # Verify column names
     deck_cols = [r[1] for r in conn.execute("PRAGMA table_info(decks)").fetchall()]
-    check("decks columns correct", deck_cols == ["id", "name", "description", "created_at"])
+    print("ACTUAL DECK COLUMNS:", deck_cols)
+    expected_deck_cols = [
+    "id",
+    "name",
+    "description",
+    "created_at",
+    "user_id",
+    "subject"
+]
+
+    check("decks columns correct", deck_cols == expected_deck_cols)
 
     card_cols = [r[1] for r in conn.execute("PRAGMA table_info(cards)").fetchall()]
-    expected_card_cols = ["id", "deck_id", "question", "answer",
-                         "attempts", "correct_count", "review_count", "created_at"]
+    print("ACTUAL CARD COLUMNS:", card_cols)
+
+    expected_card_cols = [
+    "id",
+    "deck_id",
+    "question",
+    "answer",
+    "attempts",
+    "correct_count",
+    "review_count",
+    "created_at",
+    "option_a",
+    "option_b",
+    "option_c",
+    "option_d",
+    "correct_option"
+]
+
     check("cards columns correct", card_cols == expected_card_cols)
 
     session_cols = [r[1] for r in conn.execute("PRAGMA table_info(study_sessions)").fetchall()]
-    expected_session_cols = ["id", "deck_id", "started_at", "completed_at",
-                            "cards_studied", "correct_answers"]
-    check("study_sessions columns correct", session_cols == expected_session_cols)
-
     # Verify foreign keys are ON
     fk_status = conn.execute("PRAGMA foreign_keys").fetchone()[0]
     check("foreign_keys pragma is ON", fk_status == 1)

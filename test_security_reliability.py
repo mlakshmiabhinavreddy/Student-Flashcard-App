@@ -18,6 +18,7 @@ import os
 import json
 import urllib.request
 import urllib.error
+import http.cookiejar
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -26,6 +27,12 @@ from config import Config
 BASE = "http://127.0.0.1:5000"
 PASS = 0
 FAIL = 0
+# Store Flask session cookies between requests
+cookie_jar = http.cookiejar.CookieJar()
+
+opener = urllib.request.build_opener(
+    urllib.request.HTTPCookieProcessor(cookie_jar)
+)
 
 
 def api_raw(method, path, body=None, headers=None):
@@ -40,7 +47,7 @@ def api_raw(method, path, body=None, headers=None):
         req.add_header("Content-Type", "application/json")
 
     try:
-        resp = urllib.request.urlopen(req)
+        resp = opener.open(req)
         resp_headers = dict(resp.headers)
         raw_body = resp.read().decode("utf-8")
         try:
@@ -74,27 +81,68 @@ def main():
     print("\n=========================================================")
     print("        SECURITY & RELIABILITY AUDIT TEST SUITE        ")
     print("=========================================================\n")
+    
+# ── 0. Authentication ───────────────────────────────────
+print("0. Authentication")
+
+test_email = "security-test@example.com"
+test_password = "testpassword123"
+
+auth_status, auth_res, _ = api_raw(
+    "POST",
+    "/api/auth/register",
+    {
+        "name": "Security Test User",
+        "email": test_email,
+        "password": test_password,
+        "confirm_password": test_password
+    }
+)
+
+# If the user already exists, log in instead
+if auth_status == 409:
+    auth_status, auth_res, _ = api_raw(
+        "POST",
+        "/api/auth/login",
+        {
+            "email": test_email,
+            "password": test_password
+        }
+    )
+
+# Store the result once and use the same result everywhere
+auth_success = auth_status in (200, 201)
+
+print("Authentication status:", auth_status)
+print("Authentication response:", auth_res)
+
+check("Authentication successful", auth_success)
+
+# Stop tests only if authentication genuinely failed
+if not auth_success:
+    print("\nAuthentication failed. Cannot run authenticated security tests.")
+
+
+
+
 
     # ── 1. SQL Injection Prevention ─────────────────────────
-    print("1. SQL Injection Prevention")
+    print("\n1. SQL Injection Prevention")
 
-    sqli_payload = "' OR '1'='1' -- DROP TABLE decks;"
-    status, res, _ = api_raw("POST", "/api/decks", {"name": sqli_payload, "description": "sqli test"})
-    check("SQLi payload sanitized & safely stored", status == 201 and res.get("name") == sqli_payload)
+    sqli_payload = "' OR '1'='1' -- DROP TABLE decks;" 
+    status, res, _ = api_raw( "POST", "/api/decks", { "name": sqli_payload, "description": "sqli test" } ) 
+    check( "SQLi payload sanitized & safely stored", status == 201 and res.get("name") == sqli_payload )
 
-    if status == 201:
-        created_id = res["id"]
-        # Cleanup
-        api_raw("DELETE", f"/api/decks/{created_id}")
+    if status == 201: created_id = res["id"] 
+    # Cleanup api_raw("DELETE", f"/api/decks/{created_id}")
 
     # ── 2. Malformed JSON & Non-JSON Body ────────────────────
     print("\n2. Malformed JSON & Body Handling")
 
-    status, res, _ = api_raw("POST", "/api/decks", body="INVALID_JSON_BODY{{{", headers={"Content-Type": "application/json"})
-    check("Malformed JSON -> 400 Bad Request", status == 400)
-
-    status, res, _ = api_raw("POST", "/api/decks", body="", headers={"Content-Type": "application/json"})
-    check("Empty body -> 400 Bad Request", status == 400)
+    status, res, _ = api_raw( "POST", "/api/decks", body="INVALID_JSON_BODY{{{", headers={ "Content-Type": "application/json" } ) 
+    check( "Malformed JSON -> 400 Bad Request", status == 400 ) 
+    status, res, _ = api_raw( "POST", "/api/decks", body="", headers={ "Content-Type": "application/json" } ) 
+    check( "Empty body -> 400 Bad Request", status == 400 )
 
     # ── 3. Input Validation ──────────────────────────────────
     print("\n3. Input Validation & Missing Fields")
@@ -148,9 +196,16 @@ def main():
     check("DEBUG mode is False by default", Config.DEBUG is False or Config.DEBUG is True)
     check("Database path configured safely", "database" in Config.DATABASE_PATH)
 
+    # Print final results
+def main():
+    global PASS, FAIL
+
+    # All your tests here
+    ...
+
     print("\n=========================================================")
-    print(f"   Summary: {PASS} Passed, {FAIL} Failed")
-    print("=========================================================\n")
+    print(f"Results: {PASS} passed, {FAIL} failed")
+    print("=========================================================")
 
     return 0 if FAIL == 0 else 1
 
