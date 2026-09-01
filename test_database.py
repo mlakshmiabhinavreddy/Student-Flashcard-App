@@ -57,46 +57,77 @@ def main():
     check("idx_study_sessions_deck_id exists", "idx_study_sessions_deck_id" in indexes)
     check("idx_cards_review_count exists", "idx_cards_review_count" in indexes)
 
-    # Verify column names
-         # Verify column names
-    deck_cols = [r[1] for r in conn.execute("PRAGMA table_info(decks)").fetchall()]
+      # ── Verify column names ──────────────────────────────────
+
+    deck_cols = [
+        r[1]
+        for r in conn.execute(
+            "PRAGMA table_info(decks)"
+        ).fetchall()
+    ]
+
     print("ACTUAL DECK COLUMNS:", deck_cols)
+
     expected_deck_cols = [
-    "id",
-    "name",
-    "description",
-    "created_at",
-    "user_id",
-    "subject"
-]
+        "id",
+        "name",
+        "description",
+        "created_at",
+        "user_id",
+        "subject",
+    ]
 
-    check("decks columns correct", deck_cols == expected_deck_cols)
+    check(
+        "decks columns correct",
+        deck_cols == expected_deck_cols
+    )
 
-    card_cols = [r[1] for r in conn.execute("PRAGMA table_info(cards)").fetchall()]
+    card_cols = [
+        r[1]
+        for r in conn.execute(
+            "PRAGMA table_info(cards)"
+        ).fetchall()
+    ]
+
     print("ACTUAL CARD COLUMNS:", card_cols)
 
     expected_card_cols = [
-    "id",
-    "deck_id",
-    "question",
-    "answer",
-    "attempts",
-    "correct_count",
-    "review_count",
-    "created_at",
-    "option_a",
-    "option_b",
-    "option_c",
-    "option_d",
-    "correct_option"
-]
+        "id",
+        "deck_id",
+        "question",
+        "answer",
+        "attempts",
+        "correct_count",
+        "review_count",
+        "created_at",
+        "option_a",
+        "option_b",
+        "option_c",
+        "option_d",
+        "correct_option",
+    ]
 
-    check("cards columns correct", card_cols == expected_card_cols)
+    check(
+        "cards columns correct",
+        card_cols == expected_card_cols
+    )
 
-    session_cols = [r[1] for r in conn.execute("PRAGMA table_info(study_sessions)").fetchall()]
+    session_cols = [
+        r[1]
+        for r in conn.execute(
+            "PRAGMA table_info(study_sessions)"
+        ).fetchall()
+    ]
+
     # Verify foreign keys are ON
-    fk_status = conn.execute("PRAGMA foreign_keys").fetchone()[0]
-    check("foreign_keys pragma is ON", fk_status == 1)
+    fk_status = conn.execute(
+        "PRAGMA foreign_keys"
+    ).fetchone()[0]
+
+    check(
+        "foreign_keys pragma is ON",
+        fk_status == 1
+    )
 
     conn.close()
 
