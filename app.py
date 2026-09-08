@@ -6,7 +6,7 @@ Run with:
     python app.py          (development)
     gunicorn app:app       (production)
 """
-
+from ai_service import generate_flashcards
 import functools
 import os
 from datetime import datetime, timezone
@@ -160,6 +160,10 @@ def create_app():
     def decks_page():
         user = current_user()
         return render_template("decks.html", user=user)
+
+    @app.route("/ai-generator")
+    def ai_generator():
+        return render_template("ai_generator.html")
 
     @app.route("/deck/<int:deck_id>")
     @login_required
@@ -415,6 +419,10 @@ def create_app():
     @login_required
     def api_create_card(deck_id):
         """Add a card to a deck. Requires: question, answer. Optional: MCQ options."""
+        difficulty = (data.get("difficulty") or "medium").strip().lower()
+
+        if difficulty not in ("easy", "medium", "hard"):
+            return jsonify({"error": "Invalid difficulty"}), 400
         user_id = session["user_id"]
         deck = query_db("SELECT * FROM decks WHERE id = ? AND user_id = ?", (deck_id, user_id), one=True)
         if not deck:
@@ -437,13 +445,29 @@ def create_app():
         option_c = (data.get("option_c") or "").strip() or None
         option_d = (data.get("option_d") or "").strip() or None
         correct_option = (data.get("correct_option") or "").strip() or None
+        
+        difficulty = (data.get("difficulty") or "medium").strip().lower()
+
+        if difficulty not in ("easy", "medium", "hard"):   
+            return jsonify({"error": "Invalid difficulty"}), 400
 
         card_id = execute_db(
-            """INSERT INTO cards
-               (deck_id, question, answer, option_a, option_b, option_c, option_d, correct_option)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (deck_id, question, answer, option_a, option_b, option_c, option_d, correct_option)
-        )
+    """INSERT INTO cards
+       (deck_id, question, answer, option_a, option_b, option_c,
+        option_d, correct_option, difficulty)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+    (
+        deck_id,
+        question,
+        answer,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        correct_option,
+        difficulty
+    )
+)
 
         card = query_db("SELECT * FROM cards WHERE id = ?", (card_id,), one=True)
         return jsonify(card), 201
@@ -519,6 +543,57 @@ def create_app():
 
         execute_db("DELETE FROM cards WHERE id = ?", (card_id,))
         return jsonify({"message": "Card deleted"}), 200
+    @app.route("/api/ai/generate", methods=["POST"])
+    def ai_generate_flashcards():
+        try:
+            data = request.get_json()
+
+            if not data:
+                return jsonify({
+                    "error": "Request body is required"
+                }), 400
+
+            text = data.get("text", "").strip()
+            number_of_cards = data.get("number_of_cards", 5)
+
+            if not text:
+                return jsonify({
+                    "error": "Study material is required"
+                }), 400
+
+            try:
+                number_of_cards = int(number_of_cards)
+            except (TypeError, ValueError):
+                return jsonify({
+                    "error": "number_of_cards must be an integer"
+                }), 400
+
+            if number_of_cards < 1 or number_of_cards > 20:
+                return jsonify({
+                    "error": "number_of_cards must be between 1 and 20"
+                }), 400
+
+            cards = generate_flashcards(
+                text,
+                number_of_cards
+            )
+
+            return jsonify({
+                "success": True,
+                "cards": cards
+            }), 200
+
+        except ValueError as e:
+            return jsonify({
+                "error": str(e)
+            }), 400
+
+        except Exception as e:
+            print(f"AI generation error: {type(e).__name__}: {e}")
+
+            return jsonify({
+                "error": f"{type(e).__name__}: {e}"
+            }), 500
 
     # ═════════════════════════════════════════════════════════
     #  STUDY API (user-scoped)

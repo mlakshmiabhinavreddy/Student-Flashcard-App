@@ -4046,3 +4046,40 @@ body {
         font-size: 0.55rem;
     }
 }
+
+.ai-generator-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.ai-generator-icon {
+    font-size: 42px;
+}
+
+.ai-generator-content h2 {
+    margin: 0 0 8px;
+}
+
+.ai-generator-content p {
+    margin: 0 0 16px;
+    color: #666;
+}
+
+.ai-generator-button {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 6px;
+    background: #333;
+    color: white;
+    text-decoration: none;
+}
+
+.ai-generator-button:hover {
+    opacity: 0.9;
+}
