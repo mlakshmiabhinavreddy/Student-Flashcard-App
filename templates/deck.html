@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+    <link rel="stylesheet" href="/static/css/style.css?v=studyflip3">
 </head>
 <body>
 
@@ -52,7 +52,36 @@
         </div>
 
         <div id="cards-container"></div>
-        
+
+        <!-- Study Materials Section -->
+        <section class="materials-section" id="materials-section">
+            <div class="materials-header">
+                <div>
+                    <h2 class="materials-title">📂 Study Materials</h2>
+                    <p class="materials-subtitle">Upload notes to extract topics and generate AI flashcards automatically.</p>
+                </div>
+                <label for="file-upload-input" class="btn btn-ghost materials-upload-btn" id="materials-upload-label">
+                    <span id="upload-btn-label">⬆ Upload File</span>
+                    <input type="file" id="file-upload-input" accept=".txt,.pdf,.docx" style="display:none"
+                           onchange="FileMaterials.handleFileSelect(event)">
+                </label>
+            </div>
+
+            <div class="upload-progress-wrap" id="upload-progress-wrap" style="display:none">
+                <div class="upload-progress-bar">
+                    <div class="upload-progress-bar__inner" id="upload-progress-inner"></div>
+                </div>
+                <p class="upload-status-text" id="upload-status-text">Uploading & analysing…</p>
+            </div>
+
+            <div id="materials-table-container">
+                <div class="materials-empty" id="materials-empty">
+                    <span class="materials-empty-icon">📄</span>
+                    <p>No files uploaded yet. Upload a <strong>.txt</strong>, <strong>.pdf</strong>, or <strong>.docx</strong> file to get started.</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Create / Edit Card Modal -->
@@ -72,7 +101,6 @@
                               placeholder="Enter the answer..." required></textarea>
                 </div>
 
-                <!-- MCQ Options (optional) -->
                 <details class="mcq-details">
                     <summary class="mcq-summary">
                         📝 Add custom MCQ options (optional — auto-generated if empty)
@@ -132,6 +160,38 @@
         </div>
     </div>
 
+    <!-- Generate AI Flashcards Dialog -->
+    <div class="modal-overlay" id="generate-modal-overlay">
+        <div class="modal generate-modal" role="dialog" aria-labelledby="generate-modal-title">
+            <div class="generate-modal-icon">✨</div>
+            <h2 class="modal-title" id="generate-modal-title">Generate AI Flashcards</h2>
+            <p class="generate-modal-file" id="generate-modal-file-name"></p>
+
+            <div class="generate-modal-topics" id="generate-modal-topics-preview"></div>
+
+            <div class="form-group generate-count-group">
+                <label class="form-label" for="generate-card-count">
+                    How many flashcards to create?
+                    <span class="generate-count-badge" id="generate-count-display">10</span>
+                </label>
+                <input type="range" id="generate-card-count" min="3" max="20" value="10"
+                       class="generate-count-slider"
+                       oninput="document.getElementById('generate-count-display').textContent = this.value">
+                <div class="generate-count-labels"><span>3</span><span>20</span></div>
+            </div>
+
+            <div id="generate-modal-error" class="generate-error" style="display:none"></div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="FileMaterials.closeGenerateModal()">Cancel</button>
+                <button class="btn btn-primary" id="generate-modal-submit"
+                        onclick="FileMaterials.submitGenerate()">
+                    ✨ Generate Cards
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container" class="toast-container"></div>
 
     <script>
@@ -143,5 +203,6 @@
             document.getElementById('sidebar').classList.toggle('sidebar--open');
         }
     </script>
+
 </body>
 </html>
