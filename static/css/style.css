@@ -4083,3 +4083,278 @@ body {
 .ai-generator-button:hover {
     opacity: 0.9;
 }
+
+/* ============================================================
+   Study Materials — NLP File Upload Section
+   ============================================================ */
+
+.materials-section {
+    margin-top: var(--space-2xl);
+    padding: var(--space-xl);
+    background: var(--color-bg-card);
+    border: var(--border-subtle);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 2px 12px rgba(30, 26, 23, 0.06);
+}
+
+.materials-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.materials-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.materials-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.materials-upload-btn {
+    flex-shrink: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+/* Progress bar */
+.upload-progress-wrap {
+    margin-bottom: var(--space-md);
+}
+
+.upload-progress-bar {
+    height: 6px;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.upload-progress-bar__inner {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-accent), #f0884a);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+.upload-status-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Empty state */
+.materials-empty {
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+    color: var(--color-text-muted);
+}
+
+.materials-empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: var(--space-sm);
+    opacity: 0.5;
+}
+
+/* Table */
+.materials-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: var(--border-subtle);
+}
+
+.materials-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.materials-table thead th {
+    background: var(--color-bg-secondary);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    border-bottom: var(--border-strong);
+}
+
+.materials-table tbody tr {
+    border-bottom: var(--border-subtle);
+    transition: background 0.15s ease;
+}
+
+.materials-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.materials-table tbody tr:hover {
+    background: var(--color-bg-secondary);
+}
+
+.materials-table td {
+    padding: 0.875rem 1rem;
+    vertical-align: top;
+}
+
+.materials-filename {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    min-width: 160px;
+}
+
+.file-icon {
+    margin-right: 0.4rem;
+}
+
+.materials-topics,
+.materials-subtopics {
+    max-width: 260px;
+}
+
+.materials-action {
+    white-space: nowrap;
+}
+
+/* Topic & subtopic badges */
+.topic-badge {
+    display: inline-block;
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    margin: 2px 2px 2px 0;
+}
+
+.subtopic-pill {
+    display: inline-block;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    margin: 2px 2px 2px 0;
+    border: var(--border-subtle);
+}
+
+.generate-btn {
+    font-size: var(--font-size-xs) !important;
+}
+
+/* ============================================================
+   Generate AI Flashcards Dialog
+   ============================================================ */
+
+.generate-modal {
+    text-align: center;
+    max-width: 440px;
+}
+
+.generate-modal-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+.generate-modal-file {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: 0.25rem 0 1rem 0;
+    font-weight: 500;
+}
+
+.generate-modal-topics {
+    margin-bottom: var(--space-lg);
+    min-height: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+}
+
+.generate-count-group {
+    text-align: left;
+    margin-bottom: var(--space-md);
+}
+
+.generate-count-group .form-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.generate-count-badge {
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    min-width: 2rem;
+    text-align: center;
+    padding: 1px 8px;
+    border-radius: var(--radius-full);
+}
+
+.generate-count-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    outline: none;
+    margin: 0.75rem 0 0.25rem;
+    cursor: pointer;
+    accent-color: var(--color-accent);
+}
+
+.generate-count-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--color-accent-glow);
+    transition: transform 0.15s ease;
+}
+
+.generate-count-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.generate-count-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.generate-error {
+    background: rgba(228, 0, 22, 0.08);
+    color: var(--color-danger);
+    border: 1px solid rgba(228, 0, 22, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.875rem;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-md);
+    text-align: left;
+}
