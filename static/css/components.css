@@ -47,6 +47,7 @@
 .btn-primary:hover:not(:disabled) {
     background: var(--color-accent-hover);
     box-shadow: var(--shadow-sm);
+    color: #fff;
 }
 
 .btn-success {
@@ -55,6 +56,7 @@
 }
 .btn-success:hover:not(:disabled) {
     background: var(--color-success-hover);
+    color: #fff;
 }
 
 .btn-danger {
@@ -63,6 +65,7 @@
 }
 .btn-danger:hover:not(:disabled) {
     background: var(--color-danger-hover);
+    color: #fff;
 }
 
 .btn-outline {

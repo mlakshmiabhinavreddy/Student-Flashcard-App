@@ -32,10 +32,10 @@
             <li><a href="/dashboard" class="sidebar-link" id="nav-dashboard">
                 <i data-lucide="layout-dashboard"></i> <span class="link-text">Dashboard</span>
             </a></li>
-            <li><a href="/decks" class="sidebar-link" id="nav-decks">
+            <li><a href="/decks" class="sidebar-link {% if not is_smart_review %}active{% endif %}" id="nav-decks">
                 <i data-lucide="library"></i> <span class="link-text">My Decks</span>
             </a></li>
-            <li><a href="/smart-review" class="sidebar-link" id="nav-review">
+            <li><a href="/smart-review" class="sidebar-link {% if is_smart_review %}active{% endif %}" id="nav-review">
                 <i data-lucide="brain"></i> <span class="link-text">Smart Review</span>
             </a></li>
             <li><a href="/mock-exam" class="sidebar-link" id="nav-exam">

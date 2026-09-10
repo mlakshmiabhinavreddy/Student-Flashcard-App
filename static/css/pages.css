@@ -624,6 +624,8 @@
     align-items: center;
     gap: var(--space-xs);
     color: var(--color-text-primary);
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .deck-description {
@@ -882,6 +884,8 @@
     font-weight: 600;
     margin-bottom: var(--space-xs);
     color: var(--color-text-primary);
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .dashboard-deck-desc {
