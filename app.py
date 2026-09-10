@@ -419,10 +419,7 @@ def create_app():
     @login_required
     def api_create_card(deck_id):
         """Add a card to a deck. Requires: question, answer. Optional: MCQ options."""
-        difficulty = (data.get("difficulty") or "medium").strip().lower()
 
-        if difficulty not in ("easy", "medium", "hard"):
-            return jsonify({"error": "Invalid difficulty"}), 400
         user_id = session["user_id"]
         deck = query_db("SELECT * FROM decks WHERE id = ? AND user_id = ?", (deck_id, user_id), one=True)
         if not deck:
