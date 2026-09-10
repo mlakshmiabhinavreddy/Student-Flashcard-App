@@ -20,7 +20,6 @@
 
 <body>
     <div class="app-container">
-
         <!-- ── Sidebar Navigation ──────────────────────────── -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -61,7 +60,6 @@
                 </a>
             </div>
         </nav>
-
         <!-- ── Mobile top bar ──────────────────────────────── -->
         <div class="mobile-topbar">
             <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
@@ -70,7 +68,6 @@
             <span class="mobile-brand"><i data-lucide="zap"></i> STUDYFLIP</span>
             <a href="/logout" class="mobile-logout"><i data-lucide="log-out"></i></a>
         </div>
-
         <!-- ── Main Content ────────────────────────────────── -->
         <main class="main-content" id="app-main">
             <div class="page-header">
@@ -82,14 +79,12 @@
                     + New Deck
                 </button>
             </div>
-
             <div id="decks-container">
                 <div class="loading">
                     <div class="loading-spinner"></div>
                     <p>Loading decks...</p>
                 </div>
             </div>
-
             <!-- Cloud Storage -->
             <section class="card-panel" id="cloud-storage-section" style="margin-top: 2rem;">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
@@ -100,31 +95,40 @@
                         </p>
                     </div>
                 </div>
-
                 <div style="margin-top:1.25rem;">
                     <form id="storage-upload-form">
                         <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-                            <input type="file" id="storage-file-input" class="form-input" style="max-width:400px;"
-                                required>
-
-                            <button type="submit" class="btn btn-primary" id="storage-upload-btn">
-                                <i data-lucide="cloud-upload"></i> Upload File
-                            </button>
+                            <label class="btn btn-ghost"
+                                style="display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer; border:var(--border-strong);">
+                                <input type="file" id="storage-file-input" style="display:none;" required
+                                    onchange="document.getElementById('file-chosen-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+                                <label class="btn btn-ghost" for="storage-file-input"
+                                    style="cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem; border:var(--border-strong);">
+                                    <i data-lucide="file-plus"></i> Choose File
+                                </label>
+                                <span id="file-chosen-text"
+                                    style="color:var(--color-text-muted); font-size:0.875rem;">No file chosen</span>
+                                <input type="file" id="storage-file-input" style="display:none;" required
+                                    onchange="document.getElementById('file-chosen-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+                                <span id="file-chosen-text"
+                                    style="color:var(--color-text-muted); font-size:var(--font-size-sm); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">No
+                                    file chosen</span>
+                                <button type="submit" class="btn btn-primary" id="storage-upload-btn"
+                                    style="margin-left: auto;">
+                                    <button type="submit" class="btn btn-primary" id="storage-upload-btn">
+                                        <i data-lucide="cloud-upload"></i> Upload File
+                                    </button>
                         </div>
-
                         <p id="storage-upload-status" class="text-muted" style="margin-top:0.5rem;"></p>
                     </form>
                 </div>
-
                 <div style="margin-top:1.5rem;" id="materials-section">
                     <h3 style="margin-bottom:0.75rem;">Your Study Materials</h3>
-
                     <div class="upload-progress-wrap" id="upload-progress-wrap" style="display:none">
                         <div class="upload-progress-bar">
                             <div class="upload-progress-bar__inner" id="upload-progress-inner"></div>
                         </div>
                     </div>
-
                     <div id="storage-files-container">
                         <div class="loading">
                             <div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div>
@@ -134,7 +138,6 @@
                 </div>
             </section>
         </main>
-
         <!-- Create / Edit Deck Modal -->
         <div class="modal-overlay" id="deck-modal-overlay">
             <div class="modal" role="dialog" aria-labelledby="deck-modal-title">
@@ -163,7 +166,6 @@
                 </form>
             </div>
         </div>
-
         <!-- Delete Confirmation Modal -->
         <div class="modal-overlay" id="delete-deck-modal-overlay">
             <div class="modal" role="alertdialog" aria-labelledby="delete-deck-title">
@@ -179,18 +181,14 @@
                 </div>
             </div>
         </div>
-
         <div id="toast-container" class="toast-container"></div>
-
         <!-- Generate AI Flashcards Dialog -->
         <div class="modal-overlay" id="generate-modal-overlay">
             <div class="modal generate-modal" role="dialog" aria-labelledby="generate-modal-title">
                 <div class="generate-modal-icon"><i data-lucide="sparkles"></i></div>
                 <h2 class="modal-title" id="generate-modal-title">Generate AI Flashcards</h2>
                 <p class="generate-modal-file" id="generate-modal-file-name"></p>
-
                 <div class="generate-modal-topics" id="generate-modal-topics-preview"></div>
-
                 <div class="form-group generate-count-group">
                     <label class="form-label" for="generate-target-deck">
                         Save to Deck
@@ -200,7 +198,6 @@
                         <option value="auto"><i data-lucide="sparkles"></i> Create New Deck (Auto)</option>
                     </select>
                 </div>
-
                 <div class="form-group generate-count-group">
                     <label class="form-label" for="generate-card-count">
                         How many flashcards to create?
@@ -211,9 +208,7 @@
                         oninput="document.getElementById('generate-count-display').textContent = this.value">
                     <div class="generate-count-labels"><span>3</span><span>20</span></div>
                 </div>
-
                 <div id="generate-modal-error" class="generate-error" style="display:none"></div>
-
                 <div class="modal-footer">
                     <button class="btn btn-ghost" onclick="Decks.closeGenerateModal()">Cancel</button>
                     <button class="btn btn-primary" id="generate-modal-submit" onclick="Decks.submitGenerate()">
@@ -223,7 +218,6 @@
             </div>
         </div>
         <script src="/static/js/decks.js"></script>
-
         <script src="/static/js/app.js?v=2"></script>
         <script>lucide.createIcons();</script>
     </div>

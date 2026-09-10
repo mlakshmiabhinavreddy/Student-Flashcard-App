@@ -401,6 +401,8 @@
     transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 .picker-deck-card:hover { border-color: rgba(255,255,255,0.1); background: var(--color-bg-elevated); }
+.picker-deck-info { flex: 1; min-width: 0; }
+.picker-deck-name { font-weight: 600; font-size: var(--font-size-base); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .exam-config-card { max-width: 520px; margin: 0 auto; background: var(--color-bg-card); border: var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-2xl); text-align: center; }
 .exam-config-icon { color: var(--color-accent); margin-bottom: var(--space-md); opacity: 0.7; }
@@ -482,6 +484,50 @@
 .review-nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-xl); padding: var(--space-md); background: var(--color-bg-secondary); border-radius: var(--radius-lg); }
 .review-counter { font-weight: 600; }
 .review-flip-wrapper { max-width: 720px; margin: 0 auto; perspective: 1000px; }
+
+/* ── Review Compare Panel (Exam Result Mistakes) ──────────── */
+.review-compare-panel {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.review-compare-wrong,
+.review-compare-correct {
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid transparent;
+}
+.review-compare-wrong {
+    background: var(--color-danger-glow);
+    border-color: rgba(220,38,38,0.2);
+}
+.review-compare-correct {
+    background: var(--color-success-glow);
+    border-color: rgba(5,150,105,0.2);
+}
+.review-compare-label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.review-compare-wrong .review-compare-label { color: var(--color-danger); }
+.review-compare-correct .review-compare-label { color: var(--color-success); }
+.review-compare-text {
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    font-weight: 500;
+    word-break: break-word;
+    line-height: 1.5;
+}
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE
