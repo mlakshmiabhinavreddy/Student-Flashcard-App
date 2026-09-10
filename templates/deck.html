@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Deck — STUDYFLIP. View and manage flashcards in this deck.">
+    <title>Deck — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base.css?v=7">
+    <link rel="stylesheet" href="/static/css/layout.css?v=7">
+    <link rel="stylesheet" href="/static/css/components.css?v=7">
+    <link rel="stylesheet" href="/static/css/pages.css?v=7">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- ── Sidebar Navigation ──────────────────────────── -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="/dashboard" class="sidebar-brand">
+                    <i data-lucide="zap" class="brand-icon"></i>
+                    <span class="sidebar-brand-text">STUDYFLIP</span>
+                </a>
+                <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
+                    <i data-lucide="chevron-left" id="collapse-icon"></i>
+                </button>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="/dashboard" class="sidebar-link" id="nav-dashboard">
+                        <i data-lucide="layout-dashboard"></i> <span class="link-text">Dashboard</span>
+                    </a></li>
+                <li><a href="/decks" class="sidebar-link" id="nav-decks">
+                        <i data-lucide="library"></i> <span class="link-text">My Decks</span>
+                    </a></li>
+                <li><a href="/smart-review" class="sidebar-link" id="nav-review">
+                        <i data-lucide="brain"></i> <span class="link-text">Smart Review</span>
+                    </a></li>
+                <li><a href="/mock-exam" class="sidebar-link" id="nav-exam">
+                        <i data-lucide="file-text"></i> <span class="link-text">Mock Exams</span>
+                    </a></li>
+                <li><a href="/progress" class="sidebar-link" id="nav-progress">
+                        <i data-lucide="trending-up"></i> <span class="link-text">Progress</span>
+                    </a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</div>
+                    <div class="sidebar-user-info">
+                        <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
+                    </div>
+                </div>
+                <a href="/logout" class="sidebar-logout" title="Logout">
+                    <i data-lucide="log-out"></i> <span class="link-text">Logout</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- ── Mobile top bar ──────────────────────────────── -->
+        <div class="mobile-topbar">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <i data-lucide="menu"></i>
+            </button>
+            <span class="mobile-brand"><i data-lucide="zap"></i> STUDYFLIP</span>
+            <a href="/logout" class="mobile-logout"><i data-lucide="log-out"></i></a>
+        </div>
+
+        <!-- ── Main Content ────────────────────────────────── -->
+        <main class="main-content" id="app-main">
+            <a href="/decks" class="back-link">← Back to My Decks</a>
+
+            <div id="deck-header">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading deck...</p>
+                </div>
+            </div>
+
+            <div id="cards-container"></div>
+
+        </main>
+
+        <!-- Create / Edit Card Modal -->
+        <div class="modal-overlay" id="card-modal-overlay">
+            <div class="modal modal--wide" role="dialog" aria-labelledby="card-modal-title">
+                <h2 class="modal-title" id="card-modal-title">Add Card</h2>
+                <form id="card-form" onsubmit="Deck.handleCardSubmit(event)">
+                    <input type="hidden" id="card-form-id">
+                    <div class="form-group">
+                        <label class="form-label" for="card-form-question">Question *</label>
+                        <textarea class="form-input" id="card-form-question" rows="3"
+                            placeholder="Enter your question..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="card-form-answer">Answer *</label>
+                        <textarea class="form-input" id="card-form-answer" rows="3" placeholder="Enter the answer..."
+                            required></textarea>
+                    </div>
+
+                    <details class="mcq-details">
+                        <summary class="mcq-summary">
+                            <i data-lucide="edit-3"></i> Add custom MCQ options (optional — auto-generated if empty)
+                        </summary>
+                        <div class="mcq-fields">
+                            <div class="form-group">
+                                <label class="form-label" for="card-form-option-a">Option A</label>
+                                <input type="text" class="form-input" id="card-form-option-a"
+                                    placeholder="Option A text">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="card-form-option-b">Option B</label>
+                                <input type="text" class="form-input" id="card-form-option-b"
+                                    placeholder="Option B text">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="card-form-option-c">Option C</label>
+                                <input type="text" class="form-input" id="card-form-option-c"
+                                    placeholder="Option C text">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="card-form-option-d">Option D</label>
+                                <input type="text" class="form-input" id="card-form-option-d"
+                                    placeholder="Option D text">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="card-form-correct">Correct Option</label>
+                                <select class="form-input" id="card-form-correct">
+                                    <option value="">-- Select correct option --</option>
+                                    <option value="a">A</option>
+                                    <option value="b">B</option>
+                                    <option value="c">C</option>
+                                    <option value="d">D</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" onclick="Deck.closeCardModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="card-form-submit">Add Card</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Card Confirmation Modal -->
+        <div class="modal-overlay" id="delete-card-modal-overlay">
+            <div class="modal" role="alertdialog" aria-labelledby="delete-card-title">
+                <h2 class="modal-title" id="delete-card-title">Delete Card</h2>
+                <p class="confirm-message">
+                    Are you sure you want to delete this card? This action cannot be undone.
+                </p>
+                <p class="confirm-message" style="margin-top:0.5rem">
+                    <strong id="delete-card-question"></strong>
+                </p>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="Deck.closeDeleteCardModal()">Cancel</button>
+                    <button class="btn btn-danger" id="btn-confirm-delete-card"
+                        onclick="Deck.confirmDeleteCard()">Delete</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="toast-container" class="toast-container"></div>
+
+        <script>
+            const DECK_ID = {{ deck_id }};
+        </script>
+        <script src="/static/js/deck.js"></script>
+
+
+        <script src="/static/js/app.js?v=2"></script>
+        <script>lucide.createIcons();</script>
+    </div>
+</body>
+
+</html>
