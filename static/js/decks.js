@@ -242,11 +242,13 @@ const Decks = (() => {
                         </td>
                         <td class="materials-action" style="display:flex;gap:0.5rem;justify-content:flex-end;">
                             <button class="btn btn-primary btn-sm generate-btn"
-                                    onclick="Decks.openGenerateModal(${JSON.stringify(filename)}, ${JSON.stringify(objectName)})">
-                                ✨ Generate AI Flashcards
+                                    data-filename="${escapeHtml(filename)}"
+                                    data-objectname="${escapeHtml(objectName)}"
+                                    onclick="Decks.openGenerateModal(this.dataset.filename, this.dataset.objectname)">
+                                <i data-lucide="sparkles"></i> Generate AI Flashcards
                             </button>
                             <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
-                                ⬇️
+                                <i data-lucide="download"></i>
                             </a>
                         </td>
                     </tr>
@@ -304,11 +306,13 @@ const Decks = (() => {
             </td>
             <td class="materials-action" style="display:flex;gap:0.5rem;justify-content:flex-end;">
                 <button class="btn btn-primary btn-sm generate-btn"
-                        onclick="Decks.openGenerateModal(${JSON.stringify(data.filename)}, ${JSON.stringify(data.object_name)})">
-                    ✨ Generate AI Flashcards
+                        data-filename="${escapeHtml(data.filename)}"
+                        data-objectname="${escapeHtml(data.object_name)}"
+                        onclick="Decks.openGenerateModal(this.dataset.filename, this.dataset.objectname)">
+                    <i data-lucide="sparkles"></i> Generate AI Flashcards
                 </button>
                 <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
-                    ⬇️
+                    <i data-lucide="download"></i>
                 </a>
             </td>`;
         
