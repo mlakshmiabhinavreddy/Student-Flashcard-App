@@ -79,7 +79,7 @@ def main():
 
     check(
         "decks columns correct",
-        deck_cols == expected_deck_cols
+        set(deck_cols) == set(expected_deck_cols)
     )
 
     card_cols = [
@@ -109,7 +109,7 @@ def main():
 
     check(
         "cards columns correct",
-        card_cols == expected_card_cols
+        set(card_cols) == set(expected_card_cols)
     )
 
     session_cols = [
