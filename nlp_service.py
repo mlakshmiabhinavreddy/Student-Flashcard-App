@@ -1,17 +1,19 @@
 """
 STUDYFLIP — NLP Service
-Extracts main topics and subtopics from study material text using
-Google Cloud Natural Language API.
+Extracts main topics and subtopics from study material text.
 
-Falls back gracefully to Gemini-based keyword extraction when the
-Cloud NLP API is not available (e.g., in local dev without credentials).
+Primary engine: Gemini (google-genai) — already installed.
+
+NOTE: Google Cloud Natural Language API (google-cloud-language) is currently
+incompatible with the protobuf version required by the rest of the stack
+(google-cloud-language<=2.15.1 requires protobuf<6.0, but other Google
+packages require protobuf>=6.33.5). When a compatible version is published
+the Cloud NLP path below can be re-enabled.
 """
 
 import os
 import json
 
-# ── Cloud NLP client (lazy, so app starts without credentials) ──────────────
-_nlp_client = None
 
 
 def _get_nlp_client():
