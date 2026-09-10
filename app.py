@@ -537,108 +537,8 @@ def create_app():
         return jsonify({"message": "Card deleted"}), 200
 
     # ═════════════════════════════════════════════════════════
-    #  FILE UPLOAD API (NLP-powered topic extraction)
+    #  AI GENERATION API
     # ═════════════════════════════════════════════════════════
-
-    @app.route("/api/decks/<int:deck_id>/files", methods=["GET"])
-    @login_required
-    def api_list_deck_files(deck_id):
-        """List all uploaded study material files for a deck."""
-        user_id = session["user_id"]
-        # Ownership check
-        deck = query_db("SELECT * FROM decks WHERE id = ? AND user_id = ?",
-                        (deck_id, user_id), one=True)
-        if not deck:
-            return jsonify({"error": "Deck not found"}), 404
-
-        prefix = f"users/{user_id}/decks/{deck_id}/"
-        try:
-            file_names = list_files(prefix=prefix)
-            # Return only the base filename and GCS path
-            files = [
-                {
-                    "file_name": name.split("/")[-1],
-                    "gcs_path": name,
-                }
-                for name in file_names
-            ]
-            return jsonify(files), 200
-        except Exception as exc:
-            print(f"[FILES] list_files failed: {exc}")
-            return jsonify([]), 200
-
-    @app.route("/api/decks/<int:deck_id>/files/upload", methods=["POST"])
-    @login_required
-    def api_upload_deck_file(deck_id):
-        """
-        Upload a study material file, extract text and NLP topics.
-
-        Accepts multipart/form-data with a single file field 'file'.
-
-        Returns:
-            {
-              "file_name": "python-notes.pdf",
-              "gcs_path":  "users/1/decks/3/python-notes.pdf",
-              "text":      "...",
-              "topics":    ["Python"],
-              "subtopics": ["strings", "arrays"]
-            }
-        """
-        user_id = session["user_id"]
-
-        # Ownership check
-        deck = query_db("SELECT * FROM decks WHERE id = ? AND user_id = ?",
-                        (deck_id, user_id), one=True)
-        if not deck:
-            return jsonify({"error": "Deck not found"}), 404
-
-        if "file" not in request.files:
-            return jsonify({"error": "No file provided"}), 400
-
-        file = request.files["file"]
-        if not file.filename:
-            return jsonify({"error": "Empty filename"}), 400
-
-        filename = file.filename
-        allowed_exts = {".txt", ".pdf", ".docx"}
-        ext = os.path.splitext(filename)[1].lower()
-        if ext not in allowed_exts:
-            return jsonify({
-                "error": f"Unsupported file type '{ext}'. Allowed: .txt, .pdf, .docx"
-            }), 400
-
-        file_bytes = file.read()
-        if len(file_bytes) > 10 * 1024 * 1024:   # 10 MB limit
-            return jsonify({"error": "File too large (max 10 MB)"}), 400
-
-        # ── Extract text ────────────────────────────────────────
-        text = extract_text_from_bytes(file_bytes, filename)
-
-        # ── NLP topic extraction ────────────────────────────────
-        nlp_result = extract_topics(text)
-        topics    = nlp_result.get("topics", [])
-        subtopics = nlp_result.get("subtopics", [])
-
-        # ── Upload to Cloud Storage ─────────────────────────────
-        gcs_path = None
-        try:
-            destination = f"users/{user_id}/decks/{deck_id}/{filename}"
-            import io
-            gcs_path = upload_file(
-                io.BytesIO(file_bytes),
-                destination,
-                content_type=file.content_type or "application/octet-stream",
-            )
-        except Exception as exc:
-            print(f"[FILES] GCS upload failed (non-fatal): {exc}")
-
-        return jsonify({
-            "file_name": filename,
-            "gcs_path":  gcs_path or "",
-            "text":      text[:8000],   # cap text returned to client
-            "topics":    topics,
-            "subtopics": subtopics,
-        }), 200
 
     @app.route("/api/ai/generate", methods=["POST"])
     def ai_generate_flashcards():
@@ -1815,7 +1715,7 @@ def create_app():
     @login_required
     def api_storage_upload():
         """
-        Upload a study material file to Cloud Storage.
+        Upload a study material file to Cloud Storage, and extract NLP topics if applicable.
 
         Files are isolated by user:
             users/<user_id>/files/<filename>
@@ -1845,8 +1745,10 @@ def create_app():
                 "error": "Invalid filename"
             }), 400
 
-        # Generate a unique name so repeated uploads
-        # don't overwrite each other.
+        file_bytes = file.read()
+        if len(file_bytes) > 10 * 1024 * 1024:   # 10 MB limit
+            return jsonify({"error": "File too large (max 10 MB)"}), 400
+
         extension = os.path.splitext(
             original_filename
         )[1].lower()
@@ -1860,9 +1762,22 @@ def create_app():
             f"users/{user_id}/files/{unique_name}"
         )
 
+        # ── NLP topic extraction ────────────────────────────────
+        allowed_exts = {".txt", ".pdf", ".docx"}
+        topics = []
+        subtopics = []
+        extracted_text = ""
+
+        if extension in allowed_exts:
+            extracted_text = extract_text_from_bytes(file_bytes, original_filename)
+            nlp_result = extract_topics(extracted_text)
+            topics = nlp_result.get("topics", [])
+            subtopics = nlp_result.get("subtopics", [])
+
         try:
+            import io
             uploaded_name = upload_file(
-                file,
+                io.BytesIO(file_bytes),
                 object_name,
                 file.content_type
             )
@@ -1872,6 +1787,9 @@ def create_app():
                 "filename": original_filename,
                 "object_name": uploaded_name,
                 "bucket": "digital-flashcard-app-files-2026",
+                "text": extracted_text[:8000],
+                "topics": topics,
+                "subtopics": subtopics
             }), 201
 
         except Exception as exc:

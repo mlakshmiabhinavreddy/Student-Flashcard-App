@@ -98,15 +98,18 @@
                 </form>
             </div>
 
-            <div style="margin-top:1.5rem;">
-                <h3 style="margin-bottom:0.75rem;">Your Files</h3>
+            <div style="margin-top:1.5rem;" id="materials-section">
+                <h3 style="margin-bottom:0.75rem;">Your Study Materials</h3>
+
+                <div class="upload-progress-wrap" id="upload-progress-wrap" style="display:none">
+                    <div class="upload-progress-bar">
+                        <div class="upload-progress-bar__inner" id="upload-progress-inner"></div>
+                    </div>
+                </div>
 
                 <div id="storage-files-container">
                     <div class="loading">
-                        <div
-                            class="loading-spinner"
-                            style="width:20px;height:20px;border-width:2px;"
-                        ></div>
+                        <div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div>
                         <p>Loading files...</p>
                     </div>
                 </div>
@@ -159,6 +162,47 @@
     </div>
 
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Generate AI Flashcards Dialog -->
+    <div class="modal-overlay" id="generate-modal-overlay">
+        <div class="modal generate-modal" role="dialog" aria-labelledby="generate-modal-title">
+            <div class="generate-modal-icon">✨</div>
+            <h2 class="modal-title" id="generate-modal-title">Generate AI Flashcards</h2>
+            <p class="generate-modal-file" id="generate-modal-file-name"></p>
+
+            <div class="generate-modal-topics" id="generate-modal-topics-preview"></div>
+
+            <div class="form-group generate-count-group">
+                <label class="form-label" for="generate-target-deck">
+                    Save to Deck
+                </label>
+                <select class="form-input" id="generate-target-deck" required>
+                    <option value="">-- Select a deck --</option>
+                </select>
+            </div>
+
+            <div class="form-group generate-count-group">
+                <label class="form-label" for="generate-card-count">
+                    How many flashcards to create?
+                    <span class="generate-count-badge" id="generate-count-display">10</span>
+                </label>
+                <input type="range" id="generate-card-count" min="3" max="20" value="10"
+                       class="generate-count-slider"
+                       oninput="document.getElementById('generate-count-display').textContent = this.value">
+                <div class="generate-count-labels"><span>3</span><span>20</span></div>
+            </div>
+
+            <div id="generate-modal-error" class="generate-error" style="display:none"></div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="Decks.closeGenerateModal()">Cancel</button>
+                <button class="btn btn-primary" id="generate-modal-submit"
+                        onclick="Decks.submitGenerate()">
+                    ✨ Generate Cards
+                </button>
+            </div>
+        </div>
+    </div>
     <script src="/static/js/decks.js"></script>
     <script>
         function toggleSidebar() {

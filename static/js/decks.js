@@ -13,6 +13,11 @@ const Decks = (() => {
     "use strict";
 
     let deleteTargetId = null;
+    let _allDecks = [];
+    
+    // Generator state
+    let _currentText = "";
+    let _currentFileName = "";
 
     // ── API helpers ─────────────────────────────────────────
     async function api(method, path, body) {
@@ -44,6 +49,7 @@ const Decks = (() => {
 
         try {
             const decks = await api("GET", "/api/decks");
+            _allDecks = decks;
 
             if (decks.length === 0) {
                 container.innerHTML = `
@@ -195,137 +201,182 @@ const Decks = (() => {
     // ═════════════════════════════════════════════════════════
 
     async function loadStorageFiles() {
-        const container = document.getElementById(
-            "storage-files-container"
-        );
-
+        const container = document.getElementById("storage-files-container");
         if (!container) return;
 
         try {
-            const files = await api(
-                "GET",
-                "/api/storage/files"
-            );
+            const files = await api("GET", "/api/storage/files");
 
             if (!files.files || files.files.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state" style="padding:1.5rem;">
-                        <span class="empty-state-icon">☁️</span>
-                        <h3>No files yet</h3>
-                        <p>Upload your first study material above.</p>
+                    <div class="materials-empty" id="materials-empty">
+                        <span class="materials-empty-icon">📄</span>
+                        <p>No files uploaded yet. Upload a <strong>.txt</strong>, <strong>.pdf</strong>, or <strong>.docx</strong> file to extract topics.</p>
                     </div>
                 `;
                 return;
             }
 
+            // We build the materials table structure
             let html = `
-                <div style="display:flex;flex-direction:column;gap:0.65rem;">
+                <div class="materials-table-wrap">
+                    <table class="materials-table" id="materials-table">
+                        <thead>
+                            <tr>
+                                <th>📄 File Name</th>
+                                <th>🏷 Topics</th>
+                                <th>🔖 Subtopics</th>
+                                <th>⚡ Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materials-tbody">
             `;
 
             for (const objectName of files.files) {
-                const safeObjectName = encodeURIComponent(
-                    objectName
-                );
+                const safeObjectName = encodeURIComponent(objectName);
+                const filename = objectName.split("/").pop();
 
-                const filename = objectName
-                    .split("/")
-                    .pop();
-
+                // By default, past files don't have stored topics in this iteration
+                // But they can be downloaded
                 html += `
-                    <div
-                        style="
-                            display:flex;
-                            justify-content:space-between;
-                            align-items:center;
-                            gap:1rem;
-                            padding:0.85rem 1rem;
-                            border:1px solid var(--border-color);
-                            border-radius:0.75rem;
-                        "
-                    >
-                        <div style="min-width:0;">
-                            <span>📄</span>
-                            <strong>
-                                ${escapeHtml(filename)}
-                            </strong>
-                        </div>
-
-                        <a
-                            class="btn btn-ghost btn-sm"
-                            href="/api/storage/download/${safeObjectName}"
-                        >
-                            ⬇️ Download
-                        </a>
-                    </div>
+                    <tr class="materials-row">
+                        <td class="materials-filename">
+                            <span class="file-icon">${_fileIcon(filename)}</span>
+                            ${escapeHtml(filename)}
+                        </td>
+                        <td class="materials-topics"><span class="text-muted">—</span></td>
+                        <td class="materials-subtopics"><span class="text-muted">—</span></td>
+                        <td class="materials-action">
+                            <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}">
+                                ⬇️ Download
+                            </a>
+                        </td>
+                    </tr>
                 `;
             }
 
-            html += `</div>`;
-
+            html += `</tbody></table></div>`;
             container.innerHTML = html;
 
         } catch (err) {
-            console.error(
-                "Load storage files error:",
-                err
-            );
-
-            container.innerHTML = `
-                <p class="text-muted">
-                    Unable to load your files.
-                </p>
-            `;
-
-            showToast(
-                "Failed to load Cloud Storage files",
-                "error"
-            );
+            console.error("Load storage files error:", err);
+            container.innerHTML = `<p class="text-muted">Unable to load your files.</p>`;
+            showToast("Failed to load Cloud Storage files", "error");
         }
     }
 
+    function _fileIcon(name) {
+        if (name.endsWith(".pdf"))  return "📕";
+        if (name.endsWith(".docx")) return "📘";
+        return "📄";
+    }
+
+    function _ensureTable() {
+        const container = document.getElementById("storage-files-container");
+        let tbody = document.getElementById("materials-tbody");
+        if (!tbody) {
+            container.innerHTML = `
+                <div class="materials-table-wrap">
+                    <table class="materials-table" id="materials-table">
+                        <thead>
+                            <tr>
+                                <th>📄 File Name</th>
+                                <th>🏷 Topics</th>
+                                <th>🔖 Subtopics</th>
+                                <th>⚡ Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materials-tbody"></tbody>
+                    </table>
+                </div>`;
+            tbody = document.getElementById("materials-tbody");
+        }
+        return tbody;
+    }
+
+    function addFileRow(data) {
+        const tbody = _ensureTable();
+
+        const topicsHtml = (data.topics || []).length
+            ? data.topics.map(t => `<span class="topic-badge">${escapeHtml(t)}</span>`).join(" ")
+            : '<span class="text-muted">—</span>';
+
+        const subtopicsHtml = (data.subtopics || []).length
+            ? data.subtopics.map(s => `<span class="subtopic-pill">${escapeHtml(s)}</span>`).join(" ")
+            : '<span class="text-muted">—</span>';
+
+        const safeObjectName = encodeURIComponent(data.object_name);
+
+        const row = document.createElement("tr");
+        row.className = "materials-row";
+        
+        let actionHtml = `<a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}">⬇️ Download</a>`;
+        if (data.text) {
+             actionHtml = `<button class="btn btn-primary btn-sm generate-btn"
+                        onclick="Decks.openGenerateModal(
+                            ${JSON.stringify(data.filename)},
+                            ${JSON.stringify(data.text || "")},
+                            ${JSON.stringify(data.topics || [])},
+                            ${JSON.stringify(data.subtopics || [])}
+                        )">
+                    ✨ Generate AI Flashcards
+                </button>`;
+        }
+
+        row.innerHTML = `
+            <td class="materials-filename">
+                <span class="file-icon">${_fileIcon(data.filename)}</span>
+                ${escapeHtml(data.filename)}
+            </td>
+            <td class="materials-topics">${topicsHtml}</td>
+            <td class="materials-subtopics">${subtopicsHtml}</td>
+            <td class="materials-action">${actionHtml}</td>`;
+        
+        tbody.insertBefore(row, tbody.firstChild);
+    }
+
+    // ── Animate the indeterminate progress bar ─────────────
+    function _animateProgress() {
+        const bar = document.getElementById("upload-progress-inner");
+        if(!bar) return;
+        bar.style.width = "0%";
+        let width = 0;
+        const interval = setInterval(() => {
+            width = Math.min(width + Math.random() * 8, 88);
+            bar.style.width = width + "%";
+            if (width >= 88) clearInterval(interval);
+        }, 200);
+    }
 
     async function handleStorageUpload(event) {
         event.preventDefault();
 
-        const input = document.getElementById(
-            "storage-file-input"
-        );
-
-        const button = document.getElementById(
-            "storage-upload-btn"
-        );
-
-        const status = document.getElementById(
-            "storage-upload-status"
-        );
+        const input = document.getElementById("storage-file-input");
+        const button = document.getElementById("storage-upload-btn");
+        const status = document.getElementById("storage-upload-status");
+        const progressWrap = document.getElementById("upload-progress-wrap");
 
         if (!input || !input.files.length) {
-            showToast(
-                "Please choose a file first",
-                "error"
-            );
+            showToast("Please choose a file first", "error");
             return;
         }
 
         const file = input.files[0];
-
         const formData = new FormData();
         formData.append("file", file);
 
         button.disabled = true;
-        button.textContent = "Uploading...";
+        button.textContent = "⏳ Analysing...";
+        status.textContent = `Uploading & analysing ${file.name}...`;
 
-        status.textContent =
-            `Uploading ${file.name}...`;
+        if(progressWrap) progressWrap.style.display = "block";
+        _animateProgress();
 
         try {
-            const response = await fetch(
-                "/api/storage/upload",
-                {
-                    method: "POST",
-                    body: formData,
-                }
-            );
+            const response = await fetch("/api/storage/upload", {
+                method: "POST",
+                body: formData,
+            });
 
             const data = await response.json();
 
@@ -333,35 +384,126 @@ const Decks = (() => {
                 throw data;
             }
 
-            showToast(
-                "File uploaded successfully",
-                "success"
-            );
+            const bar = document.getElementById("upload-progress-inner");
+            if(bar) bar.style.width = "100%";
 
-            status.textContent =
-                `${file.name} uploaded successfully.`;
-
+            showToast("File uploaded & analysed successfully", "success");
+            status.textContent = `✅ ${file.name} analysed successfully.`;
             input.value = "";
 
-            await loadStorageFiles();
+            addFileRow(data);
 
         } catch (err) {
-            console.error(
-                "Storage upload error:",
-                err
-            );
-
-            const message =
-                err.error ||
-                "File upload failed";
-
+            console.error("Storage upload error:", err);
+            const message = err.error || "File upload failed";
             showToast(message, "error");
-
-            status.textContent = message;
-
+            status.textContent = `❌ ${message}`;
         } finally {
             button.disabled = false;
             button.textContent = "☁️ Upload File";
+            setTimeout(() => {
+                if(progressWrap) progressWrap.style.display = "none";
+            }, 2000);
+        }
+    }
+
+    // ── Generate AI Flashcards Modal ─────────────────────────
+    function openGenerateModal(fileName, text, topics, subtopics) {
+        _currentFileName = fileName;
+        _currentText     = text;
+
+        document.getElementById("generate-modal-file-name").textContent = `📄 ${fileName}`;
+        document.getElementById("generate-card-count").value = "10";
+        document.getElementById("generate-count-display").textContent = "10";
+
+        // Show topic preview chips
+        const preview = document.getElementById("generate-modal-topics-preview");
+        if (topics && topics.length) {
+            preview.innerHTML = topics.map(t => `<span class="topic-badge">${escapeHtml(t)}</span>`).join(" ");
+        } else {
+            preview.innerHTML = "";
+        }
+
+        // Populate deck dropdown
+        const select = document.getElementById("generate-target-deck");
+        select.innerHTML = '<option value="">-- Select a deck --</option>';
+        _allDecks.forEach(deck => {
+            const opt = document.createElement("option");
+            opt.value = deck.id;
+            opt.textContent = deck.name;
+            select.appendChild(opt);
+        });
+
+        document.getElementById("generate-modal-error").style.display = "none";
+        const btn = document.getElementById("generate-modal-submit");
+        btn.disabled = false;
+        btn.textContent = "✨ Generate Cards";
+
+        document.getElementById("generate-modal-overlay").classList.add("active");
+    }
+
+    function closeGenerateModal() {
+        document.getElementById("generate-modal-overlay").classList.remove("active");
+    }
+
+    async function submitGenerate() {
+        const count = parseInt(document.getElementById("generate-card-count").value, 10);
+        const deckId = document.getElementById("generate-target-deck").value;
+        const errEl = document.getElementById("generate-modal-error");
+        const btn   = document.getElementById("generate-modal-submit");
+
+        if (!deckId) {
+            errEl.textContent = "Please select a deck to save the flashcards to.";
+            errEl.style.display = "block";
+            return;
+        }
+
+        if (!_currentText || !_currentText.trim()) {
+            errEl.textContent = "No text extracted from this file. Cannot generate cards.";
+            errEl.style.display = "block";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "⏳ Generating…";
+        errEl.style.display = "none";
+
+        try {
+            // 1. Generate flashcards
+            const genRes = await fetch("/api/ai/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: _currentText, number_of_cards: count }),
+            });
+            const genData = await genRes.json();
+            if (!genRes.ok) throw new Error(genData.error || "Generation failed");
+
+            const cards = genData.cards || [];
+            if (!cards.length) throw new Error("No cards were generated");
+
+            // 2. Bulk-add to deck
+            let added = 0;
+            for (const card of cards) {
+                try {
+                    await fetch(`/api/decks/${deckId}/cards`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ question: card.question, answer: card.answer }),
+                    });
+                    added++;
+                } catch (_) { /* skip individual failures */ }
+            }
+
+            closeGenerateModal();
+            showToast(`✅ ${added} flashcard${added !== 1 ? "s" : ""} added from "${_currentFileName}"!`, "success");
+
+            // Refresh decks view to update card counts
+            await loadDecks();
+        } catch (err) {
+            errEl.textContent = err.message;
+            errEl.style.display = "block";
+            btn.disabled = false;
+            btn.textContent = "✨ Generate Cards";
         }
     }
 
@@ -406,6 +548,7 @@ const Decks = (() => {
             if (e.key === "Escape") {
                 closeModal();
                 closeDeleteModal();
+                closeGenerateModal();
             }
         });
     });
@@ -423,5 +566,8 @@ const Decks = (() => {
         confirmDelete,
         loadStorageFiles,
         handleStorageUpload,
+        openGenerateModal,
+        closeGenerateModal,
+        submitGenerate,
     };
 })();
