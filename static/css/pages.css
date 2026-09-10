@@ -1,0 +1,159 @@
+/* ============================================================
+   Page-Specific Styles (Dashboard, Decks, Mock Exam, Progress)
+   ============================================================ */
+
+/* ── Dashboard Stats ─────────────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-icon {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    color: var(--color-text-muted);
+    opacity: 0.5;
+}
+
+.stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+    color: var(--color-text-primary);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+/* ── Deck Grid ───────────────────────────────────────────── */
+.deck-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+}
+
+.deck-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+}
+
+.deck-card:hover {
+    border-color: var(--color-accent-subtle);
+}
+
+.deck-name {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
+}
+
+.deck-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    flex: 1;
+}
+
+.deck-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-md);
+    border-top: var(--border-subtle);
+}
+
+/* ── Mock Exam ───────────────────────────────────────────── */
+.exam-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Flip Card (Review Mistakes) overrides for hardware acceleration */
+.flip-card {
+    background-color: transparent;
+    perspective: 1000px;
+    width: 100%;
+    min-height: 250px;
+    margin-bottom: var(--space-md);
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d !important;
+}
+
+.flip-card.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    top: 0;
+    left: 0;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-card);
+    border: var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-xl);
+    overflow: hidden;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    border-color: var(--color-accent);
+}
+
+/* Exam specific numeric input group */
+.number-input-group {
+    display: flex;
+    align-items: center;
+    width: 120px;
+    border: var(--border-strong);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-bg-card);
+}
+.number-input-group input {
+    border: none;
+    border-radius: 0;
+}
+.btn-number {
+    background: var(--color-bg-primary);
+    border: none;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--color-text-secondary);
+}
+.btn-number:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}

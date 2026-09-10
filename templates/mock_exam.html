@@ -8,46 +8,73 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+        <link rel="stylesheet" href="/static/css/base.css?v=4">
+    <link rel="stylesheet" href="/static/css/layout.css?v=4">
+    <link rel="stylesheet" href="/static/css/components.css?v=4">
+    <link rel="stylesheet" href="/static/css/pages.css?v=4">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+<div class="app-container">
 
+    <!-- ── Sidebar Navigation ──────────────────────────── -->
     <nav class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <span class="sidebar-brand-icon">⚡</span>
-            <span class="sidebar-brand-text">STUDYFLIP</span>
+        <div class="sidebar-header">
+            <a href="/dashboard" class="sidebar-brand">
+                <i data-lucide="zap" class="brand-icon"></i>
+                <span class="sidebar-brand-text">STUDYFLIP</span>
+            </a>
+            <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
+                <i data-lucide="chevron-left" id="collapse-icon"></i>
+            </button>
         </div>
         <ul class="sidebar-nav">
-            <li><a href="/dashboard" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a></li>
-            <li><a href="/decks" class="sidebar-link"><span class="sidebar-icon">📚</span> My Decks</a></li>
-            <li><a href="/smart-review" class="sidebar-link"><span class="sidebar-icon">🧠</span> Smart Review</a></li>
-            <li><a href="/mock-exam" class="sidebar-link active"><span class="sidebar-icon">📝</span> Mock Exams</a></li>
-            <li><a href="/progress" class="sidebar-link"><span class="sidebar-icon">📈</span> Progress</a></li>
+            <li><a href="/dashboard" class="sidebar-link" id="nav-dashboard">
+                <i data-lucide="layout-dashboard"></i> <span class="link-text">Dashboard</span>
+            </a></li>
+            <li><a href="/decks" class="sidebar-link" id="nav-decks">
+                <i data-lucide="library"></i> <span class="link-text">My Decks</span>
+            </a></li>
+            <li><a href="/smart-review" class="sidebar-link" id="nav-review">
+                <i data-lucide="brain"></i> <span class="link-text">Smart Review</span>
+            </a></li>
+            <li><a href="/mock-exam" class="sidebar-link" id="nav-exam">
+                <i data-lucide="file-text"></i> <span class="link-text">Mock Exams</span>
+            </a></li>
+            <li><a href="/progress" class="sidebar-link" id="nav-progress">
+                <i data-lucide="trending-up"></i> <span class="link-text">Progress</span>
+            </a></li>
         </ul>
         <div class="sidebar-footer">
             <div class="sidebar-user">
-                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</div>
                 <div class="sidebar-user-info">
                     <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
                 </div>
             </div>
-            <a href="/logout" class="sidebar-logout"><span>🚪</span> Logout</a>
+            <a href="/logout" class="sidebar-logout" title="Logout">
+                <i data-lucide="log-out"></i> <span class="link-text">Logout</span>
+            </a>
         </div>
     </nav>
 
+    <!-- ── Mobile top bar ──────────────────────────────── -->
     <div class="mobile-topbar">
-        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-        <span class="mobile-brand">⚡ STUDYFLIP</span>
-        <a href="/logout" class="mobile-logout">🚪</a>
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+            <i data-lucide="menu"></i>
+        </button>
+        <span class="mobile-brand"><i data-lucide="zap"></i> STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout"><i data-lucide="log-out"></i></a>
     </div>
 
+    <!-- ── Main Content ────────────────────────────────── -->
     <main class="main-content" id="app-main">
 
         <!-- ── Exam Picker Screen ──────────────────────────── -->
         <div id="exam-picker" class="exam-picker">
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">📝 Mock Exams</h1>
+                    <h1 class="page-title"><i data-lucide="edit-3"></i> Mock Exams</h1>
                     <p class="page-subtitle">Select a deck to start your timed mock exam</p>
                 </div>
             </div>
@@ -64,7 +91,7 @@
         <div id="exam-config" style="display:none;">
             <a href="#" class="back-link" onclick="MockExam.showPicker(); return false;">← Back to Decks</a>
             <div class="exam-config-card card-panel">
-                <div class="exam-config-icon">📝</div>
+                <div class="exam-config-icon"><i data-lucide="edit-3"></i></div>
                 <h2 id="config-deck-name" class="exam-config-title"></h2>
                 <p id="config-deck-subject" class="exam-config-subject"></p>
 
@@ -92,9 +119,9 @@
                 </div>
 
                 <div class="exam-config-info">
-                    <span>⏱️ Timed exam</span>
-                    <span>🎯 Auto-graded</span>
-                    <span>📊 Instant results</span>
+                    <span><i data-lucide="clock"></i> Timed exam</span>
+                    <span><i data-lucide="target"></i> Auto-graded</span>
+                    <span><i data-lucide="bar-chart-2"></i> Instant results</span>
                 </div>
 
                 <button class="btn btn-primary btn-lg" id="btn-start-exam" onclick="MockExam.startExam()">
@@ -112,7 +139,7 @@
                     <span class="exam-question-count" id="exam-question-count"></span>
                 </div>
                 <div class="exam-timer" id="exam-timer">
-                    <span class="timer-icon">⏱️</span>
+                    <span class="timer-icon"><i data-lucide="clock"></i></span>
                     <span id="timer-display">20:00</span>
                 </div>
             </div>
@@ -134,7 +161,7 @@
                 <div style="margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid rgba(108,99,255,0.12); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
                     <span style="font-size:0.8rem; color:var(--color-text-muted);">Don't want to answer? Mark as self-mastered:</span>
                     <button class="btn-know-this" id="btn-know-this" onclick="MockExam.promptKnowThis()" title="Mark this question as known without answering (won't affect exam score)">
-                        💡 I Know This
+                        <i data-lucide="lightbulb"></i> I Know This
                     </button>
                 </div>
             </div>
@@ -164,7 +191,7 @@
                     <span style="width:10px;height:10px;border-radius:50%;background:var(--color-accent);display:inline-block;"></span> Answered
                 </span>
                 <span style="font-size:0.75rem; color:var(--color-warning); display:flex; align-items:center; gap:0.35rem;">
-                    <span style="width:10px;height:10px;border-radius:50%;background:var(--color-warning);display:inline-block;"></span> Known (💡)
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--color-warning);display:inline-block;"></span> Known (<i data-lucide="lightbulb"></i>)
                 </span>
                 <span style="font-size:0.75rem; color:var(--color-warning); display:flex; align-items:center; gap:0.35rem;">
                     <span style="width:10px;height:10px;border-radius:50%;background:var(--color-danger);display:inline-block;"></span> Current
@@ -203,17 +230,17 @@
     <!-- I Know This Confirmation Modal -->
     <div class="modal-overlay" id="know-this-modal-overlay">
         <div class="modal" role="alertdialog">
-            <h2 class="modal-title">💡 Mark as Self-Mastered?</h2>
+            <h2 class="modal-title"><i data-lucide="lightbulb"></i> Mark as Self-Mastered?</h2>
             <p class="confirm-message" style="margin-bottom:0.75rem;">
                 <em id="know-this-question-text" style="color:var(--color-text-primary); font-style:normal; display:block; padding:0.75rem; background:var(--color-bg-primary); border-radius:6px; margin-bottom:1rem;"></em>
                 You're marking this question as <strong>known/self-mastered</strong>.
             </p>
             <div style="background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2); border-radius:6px; padding:0.875rem; margin-bottom:1rem; font-size:0.875rem;">
-                ⚠️ <strong>Important:</strong> This will <em>not</em> count as a correct answer in your exam score. It only updates your mastery record.
+                <i data-lucide="alert-triangle"></i> <strong>Important:</strong> This will <em>not</em> count as a correct answer in your exam score. It only updates your mastery record.
             </div>
             <div class="modal-footer">
                 <button class="btn btn-ghost" onclick="MockExam.cancelKnowThis()">Cancel</button>
-                <button class="btn" style="background:var(--color-warning); color:#000; font-weight:700;" onclick="MockExam.confirmKnowThis()">💡 Confirm — I Know This</button>
+                <button class="btn" style="background:var(--color-warning); color:#000; font-weight:700;" onclick="MockExam.confirmKnowThis()"><i data-lucide="lightbulb"></i> Confirm — I Know This</button>
             </div>
         </div>
     </div>
@@ -226,5 +253,8 @@
             document.getElementById('sidebar').classList.toggle('sidebar--open');
         }
     </script>
+    <script src="/static/js/app.js?v=2"></script>
+    <script>lucide.createIcons();</script>
+</div>
 </body>
 </html>

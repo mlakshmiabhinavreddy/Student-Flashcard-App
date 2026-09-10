@@ -8,7 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+        <link rel="stylesheet" href="/static/css/base.css?v=4">
+    <link rel="stylesheet" href="/static/css/layout.css?v=4">
+    <link rel="stylesheet" href="/static/css/components.css?v=4">
+    <link rel="stylesheet" href="/static/css/pages.css?v=4">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="auth-body">
 
@@ -28,15 +32,15 @@
                         <span>Interactive 3D Flashcards</span>
                     </div>
                     <div class="auth-feature-item">
-                        <span class="auth-feature-icon">📝</span>
+                        <span class="auth-feature-icon"><i data-lucide="edit-3"></i></span>
                         <span>Timed Mock Exams</span>
                     </div>
                     <div class="auth-feature-item">
-                        <span class="auth-feature-icon">📊</span>
+                        <span class="auth-feature-icon"><i data-lucide="bar-chart-2"></i></span>
                         <span>Personalized Progress Tracking</span>
                     </div>
                     <div class="auth-feature-item">
-                        <span class="auth-feature-icon">🎯</span>
+                        <span class="auth-feature-icon"><i data-lucide="target"></i></span>
                         <span>Adaptive Review Algorithm</span>
                     </div>
                 </div>
@@ -130,5 +134,7 @@
             }
         }
     </script>
+    <script src="/static/js/app.js?v=2"></script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>

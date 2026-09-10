@@ -8,39 +8,66 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=studyflip2">
+        <link rel="stylesheet" href="/static/css/base.css?v=4">
+    <link rel="stylesheet" href="/static/css/layout.css?v=4">
+    <link rel="stylesheet" href="/static/css/components.css?v=4">
+    <link rel="stylesheet" href="/static/css/pages.css?v=4">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+<div class="app-container">
 
+    <!-- ── Sidebar Navigation ──────────────────────────── -->
     <nav class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <span class="sidebar-brand-icon">⚡</span>
-            <span class="sidebar-brand-text">STUDYFLIP</span>
+        <div class="sidebar-header">
+            <a href="/dashboard" class="sidebar-brand">
+                <i data-lucide="zap" class="brand-icon"></i>
+                <span class="sidebar-brand-text">STUDYFLIP</span>
+            </a>
+            <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
+                <i data-lucide="chevron-left" id="collapse-icon"></i>
+            </button>
         </div>
         <ul class="sidebar-nav">
-            <li><a href="/dashboard" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a></li>
-            <li><a href="/decks" class="sidebar-link"><span class="sidebar-icon">📚</span> My Decks</a></li>
-            <li><a href="/smart-review" class="sidebar-link"><span class="sidebar-icon">🧠</span> Smart Review</a></li>
-            <li><a href="/mock-exam" class="sidebar-link"><span class="sidebar-icon">📝</span> Mock Exams</a></li>
-            <li><a href="/progress" class="sidebar-link active"><span class="sidebar-icon">📈</span> Progress</a></li>
+            <li><a href="/dashboard" class="sidebar-link" id="nav-dashboard">
+                <i data-lucide="layout-dashboard"></i> <span class="link-text">Dashboard</span>
+            </a></li>
+            <li><a href="/decks" class="sidebar-link" id="nav-decks">
+                <i data-lucide="library"></i> <span class="link-text">My Decks</span>
+            </a></li>
+            <li><a href="/smart-review" class="sidebar-link" id="nav-review">
+                <i data-lucide="brain"></i> <span class="link-text">Smart Review</span>
+            </a></li>
+            <li><a href="/mock-exam" class="sidebar-link" id="nav-exam">
+                <i data-lucide="file-text"></i> <span class="link-text">Mock Exams</span>
+            </a></li>
+            <li><a href="/progress" class="sidebar-link" id="nav-progress">
+                <i data-lucide="trending-up"></i> <span class="link-text">Progress</span>
+            </a></li>
         </ul>
         <div class="sidebar-footer">
             <div class="sidebar-user">
-                <span class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</span>
+                <div class="sidebar-user-avatar">{{ user.name[0].upper() if user else 'U' }}</div>
                 <div class="sidebar-user-info">
                     <span class="sidebar-user-name">{{ user.name if user else 'User' }}</span>
                 </div>
             </div>
-            <a href="/logout" class="sidebar-logout"><span>🚪</span> Logout</a>
+            <a href="/logout" class="sidebar-logout" title="Logout">
+                <i data-lucide="log-out"></i> <span class="link-text">Logout</span>
+            </a>
         </div>
     </nav>
 
+    <!-- ── Mobile top bar ──────────────────────────────── -->
     <div class="mobile-topbar">
-        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-        <span class="mobile-brand">⚡ STUDYFLIP</span>
-        <a href="/logout" class="mobile-logout">🚪</a>
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+            <i data-lucide="menu"></i>
+        </button>
+        <span class="mobile-brand"><i data-lucide="zap"></i> STUDYFLIP</span>
+        <a href="/logout" class="mobile-logout"><i data-lucide="log-out"></i></a>
     </div>
 
+    <!-- ── Main Content ────────────────────────────────── -->
     <main class="main-content" id="app-main">
 
         <div class="page-header">
@@ -57,12 +84,12 @@
         </div>
         <div id="progress-stats-grid" class="stats-grid stats-grid--6">
             <div class="stat-card stat-card--accent">
-                <div class="stat-icon">📝</div>
+                <div class="stat-icon"><i data-lucide="edit-3"></i></div>
                 <div class="stat-value" id="p-total-exams">—</div>
                 <div class="stat-label">Total Exams</div>
             </div>
             <div class="stat-card stat-card--success">
-                <div class="stat-icon">🎯</div>
+                <div class="stat-icon"><i data-lucide="target"></i></div>
                 <div class="stat-value" id="p-avg-score">—</div>
                 <div class="stat-label">Average Score</div>
             </div>
@@ -104,7 +131,7 @@
                 </div>
 
                 <div class="section-header" style="margin-top:1.5rem;">
-                    <h2>⚠️ Weak Areas</h2>
+                    <h2><i data-lucide="alert-triangle"></i> Weak Areas</h2>
                 </div>
                 <div class="card-panel" id="weak-areas-progress-section">
                     <div class="loading">
@@ -138,5 +165,8 @@
             document.getElementById('sidebar').classList.toggle('sidebar--open');
         }
     </script>
+    <script src="/static/js/app.js?v=2"></script>
+    <script>lucide.createIcons();</script>
+</div>
 </body>
 </html>
