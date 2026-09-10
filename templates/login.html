@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,16 @@
     <title>Login — STUDYFLIP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/static/css/base.css?v=4">
-    <link rel="stylesheet" href="/static/css/layout.css?v=4">
-    <link rel="stylesheet" href="/static/css/components.css?v=4">
-    <link rel="stylesheet" href="/static/css/pages.css?v=4">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base.css?v=5">
+    <link rel="stylesheet" href="/static/css/layout.css?v=5">
+    <link rel="stylesheet" href="/static/css/components.css?v=5">
+    <link rel="stylesheet" href="/static/css/pages.css?v=5">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="auth-body">
 
     <div class="auth-container">
@@ -25,7 +29,8 @@
                     <span class="auth-logo-text">STUDYFLIP</span>
                 </div>
                 <h1 class="auth-brand-tagline">Learn smarter.<br>Prepare better.</h1>
-                <p class="auth-brand-desc">The complete mock exam preparation platform for students who want to master their subjects.</p>
+                <p class="auth-brand-desc">The complete mock exam preparation platform for students who want to master
+                    their subjects.</p>
                 <div class="auth-features">
                     <div class="auth-feature-item">
                         <span class="auth-feature-icon"><i data-lucide="layers"></i></span>
@@ -61,24 +66,23 @@
                     <div class="form-group">
                         <label class="form-label" for="login-email">Email Address</label>
                         <div class="input-wrapper">
-                            <span class="input-icon"><i data-lucide="mail"></i></span>
                             <input type="email" id="login-email" class="form-input form-input--icon"
-                                   placeholder="you@example.com" required autocomplete="email">
+                                placeholder="you@example.com" required autocomplete="email">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="login-password">Password</label>
                         <div class="input-wrapper">
-                            <span class="input-icon"><i data-lucide="lock"></i></span>
                             <input type="password" id="login-password" class="form-input form-input--icon"
-                                   placeholder="Enter your password" required autocomplete="current-password">
+                                placeholder="Enter your password" required autocomplete="current-password">
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-login">
                         <span id="btn-login-text">LOGIN</span>
-                        <span id="btn-login-spinner" class="loading-spinner" style="display:none; width:18px;height:18px;border-width:2px;border-color:white;border-top-color:transparent;margin-left:8px;"></span>
+                        <span id="btn-login-spinner" class="loading-spinner"
+                            style="display:none; width:18px;height:18px;border-width:2px;border-color:white;border-top-color:transparent;margin-left:8px;"></span>
                     </button>
                 </form>
 
@@ -137,4 +141,5 @@
     <script src="/static/js/app.js?v=2"></script>
     <script>lucide.createIcons();</script>
 </body>
+
 </html>

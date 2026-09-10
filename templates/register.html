@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,16 @@
     <title>Register — STUDYFLIP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/static/css/base.css?v=4">
-    <link rel="stylesheet" href="/static/css/layout.css?v=4">
-    <link rel="stylesheet" href="/static/css/components.css?v=4">
-    <link rel="stylesheet" href="/static/css/pages.css?v=4">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base.css?v=5">
+    <link rel="stylesheet" href="/static/css/layout.css?v=5">
+    <link rel="stylesheet" href="/static/css/components.css?v=5">
+    <link rel="stylesheet" href="/static/css/pages.css?v=5">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="auth-body">
 
     <div class="auth-container">
@@ -25,7 +29,8 @@
                     <span class="auth-logo-text">STUDYFLIP</span>
                 </div>
                 <h1 class="auth-brand-tagline">Start your journey<br>to mastery.</h1>
-                <p class="auth-brand-desc">Join thousands of students using STUDYFLIP to ace their exams with smart flashcards and mock exam preparation.</p>
+                <p class="auth-brand-desc">Join thousands of students using STUDYFLIP to ace their exams with smart
+                    flashcards and mock exam preparation.</p>
                 <div class="auth-features">
                     <div class="auth-feature-item">
                         <span class="auth-feature-icon"><i data-lucide="check"></i></span>
@@ -61,43 +66,39 @@
                     <div class="form-group">
                         <label class="form-label" for="reg-name">Full Name</label>
                         <div class="input-wrapper">
-                            <span class="input-icon"><i data-lucide="user"></i></span>
                             <input type="text" id="reg-name" class="form-input form-input--icon"
-                                   placeholder="Your full name" required autocomplete="name">
+                                placeholder="Your full name" required autocomplete="name">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="reg-email">Email Address</label>
                         <div class="input-wrapper">
-                            <span class="input-icon"><i data-lucide="mail"></i></span>
                             <input type="email" id="reg-email" class="form-input form-input--icon"
-                                   placeholder="you@example.com" required autocomplete="email">
+                                placeholder="you@example.com" required autocomplete="email">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="reg-password">Password</label>
                         <div class="input-wrapper">
-                            <span class="input-icon"><i data-lucide="lock"></i></span>
                             <input type="password" id="reg-password" class="form-input form-input--icon"
-                                   placeholder="At least 6 characters" required autocomplete="new-password"
-                                   minlength="6">
+                                placeholder="At least 6 characters" required autocomplete="new-password" minlength="6">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="reg-confirm">Confirm Password</label>
                         <div class="input-wrapper">
-                            <span class="input-icon"><i data-lucide="key"></i></span>
                             <input type="password" id="reg-confirm" class="form-input form-input--icon"
-                                   placeholder="Repeat your password" required autocomplete="new-password">
+                                placeholder="Repeat your password" required autocomplete="new-password">
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-register">
                         <span id="btn-register-text">CREATE ACCOUNT</span>
-                        <span id="btn-register-spinner" class="loading-spinner" style="display:none; width:18px;height:18px;border-width:2px;border-color:white;border-top-color:transparent;margin-left:8px;"></span>
+                        <span id="btn-register-spinner" class="loading-spinner"
+                            style="display:none; width:18px;height:18px;border-width:2px;border-color:white;border-top-color:transparent;margin-left:8px;"></span>
                     </button>
                 </form>
 
@@ -167,4 +168,5 @@
     <script src="/static/js/app.js?v=2"></script>
     <script>lucide.createIcons();</script>
 </body>
+
 </html>
