@@ -384,8 +384,8 @@ def main():
 
 
         check(
-            "Loads style.css",
-            "style.css" in html
+            "Loads base.css",
+            "base.css" in html
         )
 
 
