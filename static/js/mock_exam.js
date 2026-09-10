@@ -79,16 +79,16 @@ const MockExam = (() => {
             const readyDecks = decks.filter(d => d.card_count >= 4);
             const notReadyDecks = decks.filter(d => d.card_count < 4);
 
-            let html = `<div class="exam-picker-grid">`;
+            let html = `<div class="deck-grid">`;
             for (const deck of readyDecks) {
                 html += `
-                    <div class="exam-deck-card" onclick="MockExam.selectDeck(${deck.id})">
-                        <div class="exam-deck-name">${escapeHtml(deck.name)}</div>
-                        <div class="exam-deck-subject">${deck.subject ? escapeHtml(deck.subject) : "General"}</div>
-                        <div class="exam-deck-meta">
-                            <span>🃏 ${deck.card_count} cards</span>
+                    <div class="picker-deck-card" onclick="MockExam.selectDeck(${deck.id})">
+                        <div class="picker-deck-info" style="flex:1;">
+                            <div style="font-weight:600; font-size:var(--font-size-base); margin-bottom:2px;">${escapeHtml(deck.name)}</div>
+                            <div style="font-size:var(--font-size-xs); color:var(--color-text-muted);">${deck.subject ? escapeHtml(deck.subject) : "General"}</div>
+                            <div style="font-size:var(--font-size-xs); margin-top:4px;">🃏 ${deck.card_count} cards</div>
                         </div>
-                        <button class="btn btn-primary btn-sm" style="width:100%">
+                        <button class="btn btn-primary btn-sm">
                             📝 Select for Exam
                         </button>
                     </div>

@@ -164,16 +164,16 @@
         const rows = exams.map(e => {
             const badgeClass = getScoreBadgeClass(e.score);
             return `
-                <tr>
-                    <td>
+                <tr class="materials-row">
+                    <td style="padding: 10px 14px;">
                         <div style="font-weight:600; color:var(--color-text-primary)">${escapeHtml(e.deck_name)}</div>
                         <div style="font-size:0.75rem; color:var(--color-text-muted)">${e.subject ? escapeHtml(e.subject) : "General"}</div>
                     </td>
-                    <td><span class="score-badge ${badgeClass}">${e.score}%</span></td>
-                    <td>${e.accuracy}%</td>
-                    <td>${e.date_str}</td>
-                    <td>${e.time_str}</td>
-                    <td>
+                    <td style="padding: 10px 14px;"><span class="score-badge ${badgeClass}">${e.score}%</span></td>
+                    <td style="padding: 10px 14px;">${e.accuracy}%</td>
+                    <td style="padding: 10px 14px;">${e.date_str}</td>
+                    <td style="padding: 10px 14px;">${e.time_str}</td>
+                    <td style="padding: 10px 14px;">
                         <a href="/exam-result/${e.id}" class="btn btn-ghost btn-sm">View</a>
                     </td>
                 </tr>
@@ -181,8 +181,8 @@
         }).join("");
 
         container.innerHTML = `
-            <div class="card-panel" style="padding:0; overflow:hidden;">
-                <table class="exam-history-table">
+            <div class="materials-table-wrap">
+                <table class="materials-table">
                     <thead>
                         <tr>
                             <th>Exam</th>

@@ -360,11 +360,27 @@
 .study-tip-bar { text-align: center; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--space-md); }
 .tip-orange { color: var(--color-warning); font-weight: 600; }
 
-.flip-card { background: transparent; perspective: 1000px; width: 100%; min-height: 300px; }
+.flip-card { background: transparent; perspective: 1000px; width: 100%; height: 380px; }
 .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
 .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-.flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; top: 0; left: 0; border-radius: var(--radius-lg); background: var(--color-bg-card); border: var(--border-subtle); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: var(--space-2xl); }
+.flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; top: 0; left: 0; border-radius: var(--radius-lg); background: var(--color-bg-card); border: var(--border-subtle); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: var(--space-2xl); box-shadow: var(--shadow-sm); }
 .flip-card-back { transform: rotateY(180deg); border-color: var(--color-accent); }
+
+.fc-label {
+    position: absolute;
+    top: var(--space-md);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+}
+.fc-label--question { background: var(--color-bg-secondary); color: var(--color-text-muted); }
+.fc-label--answer { background: var(--color-success-glow); color: var(--color-success); }
 
 .completion-card { background: var(--color-bg-card); border: var(--border-subtle); border-radius: var(--radius-xl); padding: var(--space-3xl) var(--space-xl); text-align: center; }
 .completion-icon { font-size: 4rem; margin-bottom: var(--space-lg); animation: bounce 2s infinite; }
