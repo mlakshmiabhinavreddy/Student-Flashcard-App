@@ -3,34 +3,34 @@
    ============================================================ */
 
 :root {
-    /* Colors — Slate & Indigo Dark Mode */
-    --color-bg-primary: #0F172A; /* Slate 900 */
-    --color-bg-secondary: #1E293B; /* Slate 800 */
-    --color-bg-card: #1E293B;
-    --color-bg-overlay: rgba(15, 23, 42, 0.7);
+    /* Colors — Vercel / Next.js Aesthetic */
+    --color-bg-primary: #000000;
+    --color-bg-secondary: #111111;
+    --color-bg-card: #0A0A0A;
+    --color-bg-overlay: rgba(0, 0, 0, 0.8);
 
-    --color-text-primary: #F8FAFC; /* Slate 50 */
-    --color-text-secondary: #94A3B8; /* Slate 400 */
-    --color-text-muted: #64748B; /* Slate 500 */
+    --color-text-primary: #EDEDED;
+    --color-text-secondary: #A1A1AA;
+    --color-text-muted: #71717A;
 
-    --color-accent: #6366F1; /* Indigo 500 */
-    --color-accent-hover: #818CF8; /* Indigo 400 */
-    --color-accent-glow: rgba(99, 102, 241, 0.25);
-    --color-accent-subtle: rgba(99, 102, 241, 0.15);
+    --color-accent: #0070F3;
+    --color-accent-hover: #3291FF;
+    --color-accent-glow: rgba(0, 112, 243, 0.25);
+    --color-accent-subtle: rgba(0, 112, 243, 0.15);
 
-    --color-success: #10B981; /* Emerald 500 */
+    --color-success: #10B981;
     --color-success-hover: #34D399;
     --color-success-glow: rgba(16, 185, 129, 0.2);
 
-    --color-warning: #F59E0B; /* Amber 500 */
-    --color-warning-glow: rgba(245, 158, 11, 0.2);
+    --color-warning: #F5A623;
+    --color-warning-glow: rgba(245, 166, 35, 0.2);
     
-    --color-danger: #EF4444; /* Red 500 */
+    --color-danger: #F31260;
     --color-danger-hover: #F87171;
-    --color-danger-glow: rgba(239, 68, 68, 0.2);
+    --color-danger-glow: rgba(243, 18, 96, 0.2);
 
-    --color-ink: #F8FAFC;
-    --color-ink-fg: #0F172A;
+    --color-ink: #EDEDED;
+    --color-ink-fg: #000000;
 
     /* Typography */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -58,8 +58,8 @@
     --radius-xl: 1rem;
     --radius-full: 9999px;
 
-    --border-subtle: 1px solid rgba(255, 255, 255, 0.08);
-    --border-strong: 1px solid rgba(255, 255, 255, 0.15);
+    --border-subtle: 1px solid #333333;
+    --border-strong: 1px solid #444444;
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);

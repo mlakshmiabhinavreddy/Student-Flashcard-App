@@ -1000,3 +1000,37 @@
     font-size: var(--font-size-lg);
     color: var(--color-accent);
 }
+
+/* ── Mobile Overrides ──────────────────────────────────────── */
+@media (max-width: 768px) {
+    .deck-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .stats-grid, .stats-grid--6 {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    
+    .card-list {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .deck-detail-header {
+        flex-direction: column;
+    }
+    
+    .deck-stats-row {
+        flex-wrap: wrap;
+    }
+    
+    .dashboard-deck-main {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+    
+    .weak-area-item, .recent-exam-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+}

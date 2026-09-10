@@ -278,3 +278,38 @@ textarea.form-input {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Mobile Modal Overrides ────────────────────────────────── */
+@media (max-width: 768px) {
+    .modal {
+        width: 95%;
+        margin: var(--space-md);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal--wide {
+        max-width: 100%;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: var(--space-xs);
+    }
+    
+    .deck-actions .btn {
+        width: auto; /* keep icon buttons small */
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-top: var(--space-xs);
+    }
+}
