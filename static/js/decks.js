@@ -224,8 +224,6 @@ const Decks = (() => {
                         <thead>
                             <tr>
                                 <th>📄 File Name</th>
-                                <th>🏷 Topics</th>
-                                <th>🔖 Subtopics</th>
                                 <th>⚡ Action</th>
                             </tr>
                         </thead>
@@ -236,19 +234,19 @@ const Decks = (() => {
                 const safeObjectName = encodeURIComponent(objectName);
                 const filename = objectName.split("/").pop();
 
-                // By default, past files don't have stored topics in this iteration
-                // But they can be downloaded
                 html += `
                     <tr class="materials-row">
                         <td class="materials-filename">
                             <span class="file-icon">${_fileIcon(filename)}</span>
                             ${escapeHtml(filename)}
                         </td>
-                        <td class="materials-topics"><span class="text-muted">—</span></td>
-                        <td class="materials-subtopics"><span class="text-muted">—</span></td>
-                        <td class="materials-action">
-                            <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}">
-                                ⬇️ Download
+                        <td class="materials-action" style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                            <button class="btn btn-primary btn-sm generate-btn"
+                                    onclick="Decks.openGenerateModal(${JSON.stringify(filename)}, ${JSON.stringify(objectName)})">
+                                ✨ Generate AI Flashcards
+                            </button>
+                            <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
+                                ⬇️
                             </a>
                         </td>
                     </tr>
@@ -281,8 +279,6 @@ const Decks = (() => {
                         <thead>
                             <tr>
                                 <th>📄 File Name</th>
-                                <th>🏷 Topics</th>
-                                <th>🔖 Subtopics</th>
                                 <th>⚡ Action</th>
                             </tr>
                         </thead>
@@ -296,41 +292,25 @@ const Decks = (() => {
 
     function addFileRow(data) {
         const tbody = _ensureTable();
-
-        const topicsHtml = (data.topics || []).length
-            ? data.topics.map(t => `<span class="topic-badge">${escapeHtml(t)}</span>`).join(" ")
-            : '<span class="text-muted">—</span>';
-
-        const subtopicsHtml = (data.subtopics || []).length
-            ? data.subtopics.map(s => `<span class="subtopic-pill">${escapeHtml(s)}</span>`).join(" ")
-            : '<span class="text-muted">—</span>';
-
         const safeObjectName = encodeURIComponent(data.object_name);
 
         const row = document.createElement("tr");
         row.className = "materials-row";
         
-        let actionHtml = `<a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}">⬇️ Download</a>`;
-        if (data.text) {
-             actionHtml = `<button class="btn btn-primary btn-sm generate-btn"
-                        onclick="Decks.openGenerateModal(
-                            ${JSON.stringify(data.filename)},
-                            ${JSON.stringify(data.text || "")},
-                            ${JSON.stringify(data.topics || [])},
-                            ${JSON.stringify(data.subtopics || [])}
-                        )">
-                    ✨ Generate AI Flashcards
-                </button>`;
-        }
-
         row.innerHTML = `
             <td class="materials-filename">
                 <span class="file-icon">${_fileIcon(data.filename)}</span>
                 ${escapeHtml(data.filename)}
             </td>
-            <td class="materials-topics">${topicsHtml}</td>
-            <td class="materials-subtopics">${subtopicsHtml}</td>
-            <td class="materials-action">${actionHtml}</td>`;
+            <td class="materials-action" style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button class="btn btn-primary btn-sm generate-btn"
+                        onclick="Decks.openGenerateModal(${JSON.stringify(data.filename)}, ${JSON.stringify(data.object_name)})">
+                    ✨ Generate AI Flashcards
+                </button>
+                <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
+                    ⬇️
+                </a>
+            </td>`;
         
         tbody.insertBefore(row, tbody.firstChild);
     }
@@ -408,25 +388,19 @@ const Decks = (() => {
     }
 
     // ── Generate AI Flashcards Modal ─────────────────────────
-    function openGenerateModal(fileName, text, topics, subtopics) {
+    async function openGenerateModal(fileName, objectName) {
         _currentFileName = fileName;
-        _currentText     = text;
 
         document.getElementById("generate-modal-file-name").textContent = `📄 ${fileName}`;
         document.getElementById("generate-card-count").value = "10";
         document.getElementById("generate-count-display").textContent = "10";
-
-        // Show topic preview chips
+        
         const preview = document.getElementById("generate-modal-topics-preview");
-        if (topics && topics.length) {
-            preview.innerHTML = topics.map(t => `<span class="topic-badge">${escapeHtml(t)}</span>`).join(" ");
-        } else {
-            preview.innerHTML = "";
-        }
+        preview.innerHTML = `<span class="text-muted">⏳ Analyzing document...</span>`;
 
         // Populate deck dropdown
         const select = document.getElementById("generate-target-deck");
-        select.innerHTML = '<option value="">-- Select a deck --</option>';
+        select.innerHTML = '<option value="">-- Select a deck --</option><option value="auto">✨ Create New Deck (Auto)</option>';
         _allDecks.forEach(deck => {
             const opt = document.createElement("option");
             opt.value = deck.id;
@@ -436,10 +410,36 @@ const Decks = (() => {
 
         document.getElementById("generate-modal-error").style.display = "none";
         const btn = document.getElementById("generate-modal-submit");
-        btn.disabled = false;
-        btn.textContent = "✨ Generate Cards";
+        btn.disabled = true;
+        btn.textContent = "⏳ Analyzing...";
 
         document.getElementById("generate-modal-overlay").classList.add("active");
+
+        try {
+            const response = await fetch("/api/storage/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ object_name: objectName })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Analysis failed");
+
+            _currentText = data.text;
+            
+            const allTopics = [...(data.topics || []), ...(data.subtopics || [])];
+            if (allTopics.length) {
+                preview.innerHTML = allTopics.map(t => `<span class="topic-badge">${escapeHtml(t)}</span>`).join(" ");
+            } else {
+                preview.innerHTML = `<span class="text-muted">No specific topics found. Flashcards will be generated from the text.</span>`;
+            }
+
+            btn.disabled = false;
+            btn.textContent = "✨ Generate Cards";
+        } catch (err) {
+            preview.innerHTML = `<span style="color:var(--color-danger)">❌ ${escapeHtml(err.message)}</span>`;
+            btn.disabled = false;
+            btn.textContent = "✨ Generate Cards (Try Anyway)";
+        }
     }
 
     function closeGenerateModal() {
@@ -448,7 +448,7 @@ const Decks = (() => {
 
     async function submitGenerate() {
         const count = parseInt(document.getElementById("generate-card-count").value, 10);
-        const deckId = document.getElementById("generate-target-deck").value;
+        let deckId = document.getElementById("generate-target-deck").value;
         const errEl = document.getElementById("generate-modal-error");
         const btn   = document.getElementById("generate-modal-submit");
 
@@ -469,6 +469,26 @@ const Decks = (() => {
         errEl.style.display = "none";
 
         try {
+            // If Auto Create, make the deck first
+            if (deckId === "auto") {
+                const safeName = _currentFileName.split('.').slice(0, -1).join('.') || _currentFileName;
+                const deckRes = await api("POST", "/api/decks", {
+                    name: safeName,
+                    subject: "Auto-generated",
+                    description: "Created automatically from " + _currentFileName
+                });
+                // Assuming api returns the created deck or we fetch it. Wait, api just returns { message } in standard implementation, but looking at POST /api/decks in app.py it returns { message, id }. Let's assume it returns { id }.
+                // If it doesn't return id, we might need to fetch decks and find the newest. Let's check app.py later if needed. For now, we will reload decks.
+                // Wait, POST /api/decks usually returns {"message": "Deck created successfully", "id": new_id}.
+                if (!deckRes.id) {
+                     // fallback: reload decks and pick the last one
+                     const decks = await api("GET", "/api/decks");
+                     deckId = decks[decks.length - 1].id;
+                } else {
+                     deckId = deckRes.id;
+                }
+            }
+
             // 1. Generate flashcards
             const genRes = await fetch("/api/ai/generate", {
                 method: "POST",

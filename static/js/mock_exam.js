@@ -139,15 +139,32 @@ const MockExam = (() => {
         document.getElementById("config-deck-subject").textContent =
             deck.subject ? `Subject: ${deck.subject}` : "General";
 
-        const numSel = document.getElementById("config-num-questions");
-        const maxQ = Math.min(30, deck.card_count);
-        Array.from(numSel.options).forEach(opt => {
-            opt.disabled = parseInt(opt.value) > maxQ;
-        });
-        const defaultQ = maxQ >= 20 ? "20" : String(maxQ);
-        numSel.value = defaultQ;
+        const numInput = document.getElementById("config-num-questions");
+        const maxQ = deck.card_count;
+        numInput.max = maxQ;
+        
+        const defaultQ = maxQ >= 20 ? 20 : maxQ;
+        numInput.value = defaultQ;
 
         showScreen("exam-config");
+    }
+
+    function validateQuestionCount() {
+        const numInput = document.getElementById("config-num-questions");
+        let val = parseInt(numInput.value) || 1;
+        const maxQ = selectedDeck ? selectedDeck.card_count : 100;
+        
+        if (val < 1) val = 1;
+        if (val > maxQ) val = maxQ;
+        numInput.value = val;
+    }
+
+    function changeQuestionCount(delta) {
+        const numInput = document.getElementById("config-num-questions");
+        let val = parseInt(numInput.value) || 1;
+        val += delta;
+        numInput.value = val;
+        validateQuestionCount();
     }
 
     // ── Phase 3: Start Exam ──────────────────────────────────
@@ -530,6 +547,8 @@ const MockExam = (() => {
         submitExam,
         promptKnowThis,
         confirmKnowThis,
-        cancelKnowThis
+        cancelKnowThis,
+        changeQuestionCount,
+        validateQuestionCount
     };
 })();

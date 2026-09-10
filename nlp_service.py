@@ -25,6 +25,7 @@ def extract_text_from_bytes(file_bytes: bytes, filename: str) -> str:
       .txt  — decoded as UTF-8 (Latin-1 fallback)
       .pdf  — pdfplumber text extraction
       .docx — python-docx paragraph extraction
+      .pptx — python-pptx text frame extraction
     """
     name_lower = filename.lower()
 
@@ -57,6 +58,21 @@ def extract_text_from_bytes(file_bytes: bytes, filename: str) -> str:
             return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
         except Exception as exc:
             print(f"[NLP] DOCX extraction failed: {exc}")
+            return ""
+
+    if name_lower.endswith(".pptx"):
+        try:
+            import pptx
+            import io
+            prs = pptx.Presentation(io.BytesIO(file_bytes))
+            text_runs = []
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        text_runs.append(shape.text)
+            return "\n".join(text_runs)
+        except Exception as exc:
+            print(f"[NLP] PPTX extraction failed: {exc}")
             return ""
 
     # Fallback: raw UTF-8

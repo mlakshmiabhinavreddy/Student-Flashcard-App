@@ -71,14 +71,11 @@
                 <div class="exam-config-options">
                     <div class="config-option">
                         <label class="form-label" for="config-num-questions">Number of Questions</label>
-                        <select class="form-input" id="config-num-questions">
-                            <option value="5">5 Questions</option>
-                            <option value="10">10 Questions</option>
-                            <option value="15">15 Questions</option>
-                            <option value="20" selected>20 Questions</option>
-                            <option value="25">25 Questions</option>
-                            <option value="30">30 Questions</option>
-                        </select>
+                        <div class="number-input-group">
+                            <button type="button" class="btn-number" onclick="MockExam.changeQuestionCount(-1)">−</button>
+                            <input type="number" class="form-input text-center" id="config-num-questions" value="10" min="1" max="100" onchange="MockExam.validateQuestionCount()">
+                            <button type="button" class="btn-number" onclick="MockExam.changeQuestionCount(1)">+</button>
+                        </div>
                     </div>
                     <div class="config-option">
                         <label class="form-label" for="config-time-limit">Time Limit (minutes)</label>

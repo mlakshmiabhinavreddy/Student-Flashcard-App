@@ -1753,26 +1753,11 @@ def create_app():
             original_filename
         )[1].lower()
 
-        unique_name = (
-            f"{uuid.uuid4().hex}"
-            f"{extension}"
-        )
+        allowed_exts = {".pdf", ".docx", ".pptx", ".txt"}
+        if extension not in allowed_exts:
+            return jsonify({"error": f"Unsupported file type. Allowed: {', '.join(allowed_exts)}"}), 400
 
-        object_name = (
-            f"users/{user_id}/files/{unique_name}"
-        )
-
-        # ── NLP topic extraction ────────────────────────────────
-        allowed_exts = {".txt", ".pdf", ".docx"}
-        topics = []
-        subtopics = []
-        extracted_text = ""
-
-        if extension in allowed_exts:
-            extracted_text = extract_text_from_bytes(file_bytes, original_filename)
-            nlp_result = extract_topics(extracted_text)
-            topics = nlp_result.get("topics", [])
-            subtopics = nlp_result.get("subtopics", [])
+        object_name = f"users/{user_id}/files/{original_filename}"
 
         try:
             import io
@@ -1787,9 +1772,6 @@ def create_app():
                 "filename": original_filename,
                 "object_name": uploaded_name,
                 "bucket": "digital-flashcard-app-files-2026",
-                "text": extracted_text[:8000],
-                "topics": topics,
-                "subtopics": subtopics
             }), 201
 
         except Exception as exc:
@@ -1801,6 +1783,46 @@ def create_app():
                 "error": "File upload failed"
             }), 500
 
+
+    @app.route("/api/storage/analyze", methods=["POST"])
+    @login_required
+    def api_storage_analyze():
+        """
+        Dynamically analyzes a file from GCS, extracting its text and NLP topics.
+        Expects JSON: { "object_name": "users/<user_id>/files/..." }
+        """
+        data = request.get_json() or {}
+        object_name = data.get("object_name")
+        if not object_name:
+            return jsonify({"error": "No object_name provided"}), 400
+
+        user_id = str(session["user_id"])
+        if not object_name.startswith(f"users/{user_id}/files/"):
+            return jsonify({"error": "Access denied"}), 403
+
+        try:
+            file_data, _ = download_file(object_name)
+            filename = os.path.basename(object_name)
+
+            extracted_text = extract_text_from_bytes(file_data, filename)
+            
+            if not extracted_text.strip():
+                return jsonify({"error": "No text could be extracted from this file."}), 400
+
+            nlp_result = extract_topics(extracted_text)
+            
+            return jsonify({
+                "filename": filename,
+                "text": extracted_text[:8000],
+                "topics": nlp_result.get("topics", []),
+                "subtopics": nlp_result.get("subtopics", [])
+            }), 200
+
+        except FileNotFoundError:
+            return jsonify({"error": "File not found"}), 404
+        except Exception as exc:
+            print(f"[STORAGE] Analysis failed: {exc}")
+            return jsonify({"error": "Failed to analyze file"}), 500
 
     @app.route(
         "/api/storage/download/<path:object_name>",

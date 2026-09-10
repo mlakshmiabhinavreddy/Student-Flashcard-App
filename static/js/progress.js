@@ -64,7 +64,7 @@
         setText("p-questions", p.total_questions_attempted || 0);
         setText("p-accuracy",
             p.overall_exam_accuracy > 0 ? `${p.overall_exam_accuracy}%`
-            : (p.overall_study_accuracy > 0 ? `${p.overall_study_accuracy}%` : "—")
+                : (p.overall_study_accuracy > 0 ? `${p.overall_study_accuracy}%` : "—")
         );
         setText("p-mastered", p.cards_mastered || 0);
     }
@@ -238,7 +238,7 @@
                 <div class="weak-area-item">
                     <div class="weak-area-info">
                         <div class="weak-area-name">${escapeHtml(c.question.substring(0, 60))}${c.question.length > 60 ? "..." : ""}</div>
-                        <div class="weak-area-subject">${escapeHtml(c.deck_name)} · ${c.attempts} attempts</div>
+                        <div class="weak-area-subject">${escapeHtml(c.deck_name)} · ${c.attempts} questions</div>
                     </div>
                     <span class="weak-area-badge">${c.accuracy}%</span>
                 </div>
