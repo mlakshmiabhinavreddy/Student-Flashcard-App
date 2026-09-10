@@ -788,9 +788,6 @@ const Dashboard = (() => {
 
             <div
                 class="dashboard-deck-card"
-                style="
-                    margin-bottom:1rem;
-                "
             >
 
                 <div

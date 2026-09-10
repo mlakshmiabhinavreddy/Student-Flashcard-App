@@ -6,8 +6,8 @@
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-lg);
-    margin-bottom: var(--space-2xl);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
 }
 
 .stat-card {
@@ -15,8 +15,8 @@
     overflow: hidden;
     background: var(--color-bg-card);
     border: var(--border-subtle);
-    border-radius: var(--radius-xl);
-    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
     box-shadow: var(--shadow-sm);
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -35,17 +35,19 @@
 }
 
 .stat-value {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
     font-weight: 700;
-    line-height: 1;
-    margin-bottom: var(--space-xs);
+    line-height: 1.2;
+    margin-bottom: 2px;
     color: var(--color-text-primary);
 }
 
 .stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 /* ── Deck Grid ───────────────────────────────────────────── */
@@ -172,77 +174,92 @@
 /* ── Dashboard Specific Layout ───────────────────────────── */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: var(--space-2xl);
+    grid-template-columns: 5fr 2fr;
+    gap: var(--space-lg);
     align-items: start;
 }
 
 .dashboard-left {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
+    gap: var(--space-md);
 }
 
 .dashboard-right {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
+    gap: var(--space-md);
+    position: sticky;
+    top: var(--space-lg);
 }
 
 @media (max-width: 1024px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
+    .dashboard-right {
+        position: static;
+    }
 }
 
 /* Dashboard Stats Grid Enhancements */
 .stats-grid--6 {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
-.stat-card--accent { border-top: 4px solid var(--color-accent); }
-.stat-card--success { border-top: 4px solid var(--color-success); }
-.stat-card--warning { border-top: 4px solid var(--color-warning); }
-.stat-card--danger { border-top: 4px solid var(--color-danger); }
+.stat-card--accent { border-left: 3px solid var(--color-accent); }
+.stat-card--success { border-left: 3px solid var(--color-success); }
+.stat-card--warning { border-left: 3px solid var(--color-warning); }
+.stat-card--danger { border-left: 3px solid var(--color-danger); }
 
 .stat-icon {
     position: absolute;
-    top: var(--space-md);
-    right: var(--space-md);
+    top: var(--space-sm);
+    right: var(--space-sm);
     color: var(--color-text-muted);
-    font-size: var(--font-size-2xl);
-    opacity: 0.3;
+    font-size: var(--font-size-lg);
+    opacity: 0.15;
 }
 
 /* Smart Review Banner */
 .smart-review-card {
-    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-    color: white;
+    background: var(--color-bg-card);
+    border: var(--border-subtle);
+    border-left: 3px solid var(--color-success);
+    color: var(--color-text-primary);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-xl);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-lg);
 }
 
 .smart-review-header {
     display: flex;
     align-items: center;
-    gap: var(--space-md);
+    gap: var(--space-sm);
 }
 
 .smart-review-icon {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-xl);
+    color: var(--color-success);
 }
 
 .smart-review-title {
-    font-size: var(--font-size-xl);
-    margin-bottom: var(--space-xs);
-    color: white;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--color-text-primary);
 }
 
 .smart-review-subtitle {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color-text-muted);
     margin: 0;
+    font-size: var(--font-size-xs);
+}
+
+.smart-review-description {
+    display: none;
 }
 
 .smart-review-action {
@@ -253,44 +270,52 @@
 .ai-generator-card {
     background: var(--color-bg-card);
     border: var(--border-subtle);
-    border-radius: var(--radius-xl);
-    padding: var(--space-xl);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
     display: flex;
-    gap: var(--space-lg);
-    align-items: flex-start;
-    box-shadow: var(--shadow-sm);
+    gap: var(--space-md);
+    align-items: center;
 }
 
 .ai-generator-icon {
-    font-size: 3rem;
-    background: var(--color-bg-secondary);
-    padding: var(--space-md);
-    border-radius: var(--radius-lg);
+    font-size: var(--font-size-xl);
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.ai-generator-content {
+    flex: 1;
 }
 
 .ai-generator-content h2 {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--space-sm);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin-bottom: 2px;
 }
 
 .ai-generator-content p {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-lg);
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+    font-size: var(--font-size-xs);
 }
 
 .ai-generator-button {
     display: inline-block;
     background: var(--color-accent);
     color: white;
-    padding: var(--space-sm) var(--space-lg);
+    padding: 6px var(--space-md);
     border-radius: var(--radius-md);
     text-decoration: none;
     font-weight: 600;
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
     transition: background var(--transition-fast);
 }
 
 .ai-generator-button:hover {
     background: var(--color-accent-hover);
+    color: white;
 }
 
 /* ── Mock Exam Specific Layout ───────────────────────────── */
@@ -409,9 +434,43 @@
 }
 
 .section-header {
-    margin-bottom: var(--space-xl);
-    border-bottom: 2px solid var(--color-border);
-    padding-bottom: var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid #222;
+}
+
+.section-header h2 {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+/* Exam CTA Card */
+.exam-cta-card {
+    text-align: center;
+    padding: var(--space-lg) !important;
+}
+
+.exam-cta-card h3 {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.exam-cta-card p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+}
+
+.exam-cta-icon {
+    color: var(--color-accent);
+    margin-bottom: var(--space-sm);
 }
 
 .review-nav-row {
@@ -444,18 +503,24 @@
 
 .progress-bar-track {
     width: 100%;
-    height: 8px;
-    background: var(--color-border);
+    height: 6px;
+    background: #222;
     border-radius: var(--radius-full);
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-md);
     overflow: hidden;
 }
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+    background: var(--color-accent);
     border-radius: var(--radius-full);
     transition: width 0.3s ease;
+}
+
+/* Inside dashboard deck cards, strip extra margin */
+.dashboard-deck-progress .progress-bar-track {
+    margin-bottom: 0;
+    height: 4px;
 }
 
 .study-card-wrapper {
@@ -862,11 +927,10 @@
     background: var(--color-bg-card);
     border: var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    box-shadow: var(--shadow-sm);
+    padding: var(--space-md) var(--space-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-sm);
 }
 
 .dashboard-deck-main {
@@ -895,8 +959,8 @@
 
 .dashboard-deck-stats {
     display: flex;
-    gap: var(--space-md);
-    margin-top: var(--space-md);
+    gap: var(--space-lg);
+    margin-top: var(--space-xs);
 }
 
 .dashboard-stat-item {
@@ -916,7 +980,7 @@
 
 .dashboard-deck-progress {
     border-top: var(--border-subtle);
-    padding-top: var(--space-md);
+    padding-top: var(--space-sm);
 }
 
 .dashboard-progress-header {
@@ -929,7 +993,6 @@
 .dashboard-deck-actions {
     display: flex;
     gap: var(--space-sm);
-    margin-top: var(--space-md);
 }
 
 /* ── Weak Areas ────────────────────────────────────────────── */

@@ -6,15 +6,12 @@
 .card-panel {
     background: var(--color-bg-card);
     border: var(--border-subtle);
-    border-radius: var(--radius-xl);
-    padding: var(--space-xl);
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
 }
 
 .card-panel:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    /* intentionally no lift — prevents layout jitter on dashboards */
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
