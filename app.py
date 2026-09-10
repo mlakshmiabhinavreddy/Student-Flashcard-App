@@ -443,28 +443,22 @@ def create_app():
         option_d = (data.get("option_d") or "").strip() or None
         correct_option = (data.get("correct_option") or "").strip() or None
         
-        difficulty = (data.get("difficulty") or "medium").strip().lower()
-
-        if difficulty not in ("easy", "medium", "hard"):   
-            return jsonify({"error": "Invalid difficulty"}), 400
-
         card_id = execute_db(
-    """INSERT INTO cards
-       (deck_id, question, answer, option_a, option_b, option_c,
-        option_d, correct_option, difficulty)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-    (
-        deck_id,
-        question,
-        answer,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        correct_option,
-        difficulty
-    )
-)
+            """INSERT INTO cards
+               (deck_id, question, answer, option_a, option_b, option_c,
+                option_d, correct_option)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                deck_id,
+                question,
+                answer,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                correct_option
+            )
+        )
 
         card = query_db("SELECT * FROM cards WHERE id = ?", (card_id,), one=True)
         return jsonify(card), 201
