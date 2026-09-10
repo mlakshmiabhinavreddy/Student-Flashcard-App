@@ -240,16 +240,18 @@ const Decks = (() => {
                             <span class="file-icon">${_fileIcon(filename)}</span>
                             ${escapeHtml(filename)}
                         </td>
-                        <td class="materials-action" style="display:flex;gap:0.5rem;justify-content:flex-end;">
-                            <button class="btn btn-primary btn-sm generate-btn"
-                                    data-filename="${escapeHtml(filename)}"
-                                    data-objectname="${escapeHtml(objectName)}"
-                                    onclick="Decks.openGenerateModal(this.dataset.filename, this.dataset.objectname)">
-                                <i data-lucide="sparkles"></i> Generate AI Flashcards
-                            </button>
-                            <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
-                                <i data-lucide="download"></i>
-                            </a>
+                        <td class="materials-action">
+                            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                                <button class="btn btn-primary btn-sm generate-btn"
+                                        data-filename="${escapeHtml(filename)}"
+                                        data-objectname="${escapeHtml(objectName)}"
+                                        onclick="Decks.openGenerateModal(this.dataset.filename, this.dataset.objectname)">
+                                    <i data-lucide="sparkles"></i> Generate AI Flashcards
+                                </button>
+                                <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
+                                    <i data-lucide="download"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -304,16 +306,18 @@ const Decks = (() => {
                 <span class="file-icon">${_fileIcon(data.filename)}</span>
                 ${escapeHtml(data.filename)}
             </td>
-            <td class="materials-action" style="display:flex;gap:0.5rem;justify-content:flex-end;">
-                <button class="btn btn-primary btn-sm generate-btn"
-                        data-filename="${escapeHtml(data.filename)}"
-                        data-objectname="${escapeHtml(data.object_name)}"
-                        onclick="Decks.openGenerateModal(this.dataset.filename, this.dataset.objectname)">
-                    <i data-lucide="sparkles"></i> Generate AI Flashcards
-                </button>
-                <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
-                    <i data-lucide="download"></i>
-                </a>
+            <td class="materials-action">
+                <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                    <button class="btn btn-primary btn-sm generate-btn"
+                            data-filename="${escapeHtml(data.filename)}"
+                            data-objectname="${escapeHtml(data.object_name)}"
+                            onclick="Decks.openGenerateModal(this.dataset.filename, this.dataset.objectname)">
+                        <i data-lucide="sparkles"></i> Generate AI Flashcards
+                    </button>
+                    <a class="btn btn-ghost btn-sm" href="/api/storage/download/${safeObjectName}" title="Download">
+                        <i data-lucide="download"></i>
+                    </a>
+                </div>
             </td>`;
         
         tbody.insertBefore(row, tbody.firstChild);

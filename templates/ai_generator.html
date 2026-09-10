@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Flashcard Generator — STUDYFLIP.">
+    <title>AI Generator — STUDYFLIP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base.css?v=11">
+    <link rel="stylesheet" href="/static/css/layout.css?v=11">
+    <link rel="stylesheet" href="/static/css/components.css?v=11">
+    <link rel="stylesheet" href="/static/css/pages.css?v=11">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--color-accent) 0%, #6366f1 45%, #8b5cf6 100%);
+            border-radius: var(--radius-xl);
+            padding: var(--space-3xl);
+            color: white;
+            margin-bottom: var(--space-2xl);
+            box-shadow: 0 18px 45px rgba(94, 106, 210, 0.15);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            right: -70px;
+            top: -90px;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            right: 120px;
+            bottom: -100px;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            line-height: 1.15;
+            margin-bottom: var(--space-sm);
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: var(--font-size-base);
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .generator-card {
+            background: var(--color-bg-card);
+            border: var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-sm);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        #studyMaterial {
+            min-height: 240px;
+            background: var(--color-bg-primary);
+        }
+
+        .options-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+            flex-wrap: wrap;
+        }
+
+        .select-group {
+            width: 220px;
+        }
+
+        .loading-state {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+            padding: var(--space-md);
+            background: var(--color-accent-subtle);
+            color: var(--color-accent);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+
+        .error-state {
+            display: none;
+            margin-top: var(--space-xl);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            background: var(--color-danger-glow);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: var(--color-danger);
+            font-size: var(--font-size-sm);
+        }
+
+        .results-section {
+            display: none;
+            margin-top: var(--space-2xl);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            gap: var(--space-md);
+        }
+
+        .cards-container {
+            display: grid;
+            gap: var(--space-lg);
+        }
+
+        .ai-note {
+            margin-top: var(--space-xl);
+            text-align: center;
+            color: var(--color-text-muted);
+            font-size: var(--font-size-xs);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- ── Sidebar Navigation ──────────────────────────── -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="/dashboard" class="sidebar-brand">
+                    <i data-lucide="zap" class="brand-icon"></i>
+                    <span class="sidebar-brand-text">STUDYFLIP</span>
+                </a>
+                <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse Sidebar">
+                    <i data-lucide="chevron-left" id="collapse-icon"></i>
+                </button>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="/dashboard" class="sidebar-link" id="nav-dashboard">
+                        <i data-lucide="layout-dashboard"></i> <span class="link-text">Dashboard</span>
+                    </a></li>
+                <li><a href="/decks" class="sidebar-link" id="nav-decks">
+                        <i data-lucide="library"></i> <span class="link-text">My Decks</span>
+                    </a></li>
+                <li><a href="/smart-review" class="sidebar-link" id="nav-review">
+                        <i data-lucide="brain"></i> <span class="link-text">Smart Review</span>
+                    </a></li>
+                <li><a href="/mock-exam" class="sidebar-link" id="nav-exam">
+                        <i data-lucide="file-text"></i> <span class="link-text">Mock Exams</span>
+                    </a></li>
+                <li><a href="/progress" class="sidebar-link" id="nav-progress">
+                        <i data-lucide="trending-up"></i> <span class="link-text">Progress</span>
+                    </a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-avatar">A</div>
+                    <div class="sidebar-user-info">
+                        <span class="sidebar-user-name">User</span>
+                    </div>
+                </div>
+                <a href="/logout" class="sidebar-logout" title="Logout">
+                    <i data-lucide="log-out"></i> <span class="link-text">Logout</span>
+                </a>
+            </div>
+        </nav>
+        <!-- ── Mobile top bar ──────────────────────────────── -->
+        <div class="mobile-topbar">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <i data-lucide="menu"></i>
+            </button>
+            <span class="mobile-brand"><i data-lucide="zap"></i> STUDYFLIP</span>
+            <a href="/logout" class="mobile-logout"><i data-lucide="log-out"></i></a>
+        </div>
+        <!-- ── Main Content ────────────────────────────────── -->
+        <main class="main-content" id="app-main">
+            <!-- HERO -->
+            <section class="hero">
+                <div class="hero-content">
+                    <div class="ai-badge">
+                        <i data-lucide="sparkles"></i> Powered by AI
+                    </div>
+                    <h1>Turn your notes into smart flashcards</h1>
+                    <p>Paste your study material and let AI transform important concepts into concise questions and
+                        answers for faster revision.</p>
+                </div>
+            </section>
+            <!-- GENERATOR -->
+            <section class="generator-card">
+                <div class="page-header" style="margin-bottom:var(--space-md);">
+                    <div>
+                        <h2
+                            style="font-size:var(--font-size-xl); margin-bottom:var(--space-xs); display:flex; align-items:center; gap:var(--space-sm);">
+                            <span style="font-size:1.5rem;">📚</span> Study Material
+                        </h2>
+                        <p class="page-subtitle">Paste your notes, textbook content, lecture material, or any topic you
+                            want to revise.</p>
+                    </div>
+                </div>
+                <div class="input-label">
+                    <span>Your content</span>
+                    <span style="color:var(--color-text-muted); font-size:var(--font-size-xs); font-weight:normal;">
+                        <span id="characterCount">0</span> characters
+                    </span>
+                </div>
+                <textarea id="studyMaterial" class="form-input"
+                    placeholder="Example:&#10;&#10;Photosynthesis is the process by which green plants convert light energy into chemical energy. Chlorophyll absorbs sunlight, which is used to convert carbon dioxide and water into glucose and oxygen..."></textarea>
+                <div class="options-row">
+                    <div class="select-group">
+                        <label class="form-label" for="numberOfCards">Number of flashcards</label>
+                        <select id="numberOfCards" class="form-input">
+                            <option value="3">3 cards</option>
+                            <option value="5" selected>5 cards</option>
+                            <option value="8">8 cards</option>
+                            <option value="10">10 cards</option>
+                            <option value="15">15 cards</option>
+                            <option value="20">20 cards</option>
+                        </select>
+                    </div>
+                    <button id="generateButton" class="btn btn-primary btn-lg" onclick="generateFlashcards()"
+                        style="min-width:200px;">
+                        <i data-lucide="sparkles"></i> Generate Flashcards
+                    </button>
+                </div>
+                <!-- LOADING -->
+                <div id="loading" class="loading-state">
+                    <div class="loading-spinner"
+                        style="width:16px; height:16px; border-width:2px; border-color:var(--color-accent); border-top-color:transparent;">
+                    </div>
+                    <span>AI is analyzing your study material...</span>
+                </div>
+                <!-- ERROR -->
+                <div id="error" class="error-state"></div>
+            </section>
+            <!-- =========================
+                 RESULTS
+            ========================== -->
+            <section id="resultsSection" class="results-section">
+                <div class="results-header">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:var(--space-sm); margin-bottom:4px;">
+                            <h2 style="font-size:var(--font-size-xl);">Generated Flashcards</h2>
+                            <span id="resultCount" class="badge badge-primary" style="font-size:var(--font-size-xs);">0
+                                cards</span>
+                        </div>
+                        <p class="page-subtitle">Review the AI-generated questions and answers below.</p>
+                    </div>
+                </div>
+                <div id="cardsContainer" class="cards-container"></div>
+                <div class="ai-note">
+                    🤖 Flashcards are generated using an AI language model. Always review AI-generated content for
+                    accuracy.
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        const studyMaterial = document.getElementById("studyMaterial");
+        const characterCount = document.getElementById("characterCount");
+        const generateButton = document.getElementById("generateButton");
+        const loading = document.getElementById("loading");
+        const error = document.getElementById("error");
+        const resultsSection = document.getElementById("resultsSection");
+        const cardsContainer = document.getElementById("cardsContainer");
+        const resultCount = document.getElementById("resultCount");
+        studyMaterial.addEventListener("input", function () {
+            characterCount.textContent = this.value.length;
+        });
+        async function generateFlashcards() {
+            const text = studyMaterial.value.trim();
+            const numberOfCards = parseInt(document.getElementById("numberOfCards").value);
+            error.style.display = "none";
+            error.textContent = "";
+            if (!text) {
+                error.textContent = "Please enter some study material first.";
+                error.style.display = "block";
+                studyMaterial.focus();
+                return;
+            }
+            generateButton.disabled = true;
+            generateButton.innerHTML = "⏳ Generating...";
+            loading.style.display = "flex";
+            resultsSection.style.display = "none";
+            cardsContainer.innerHTML = "";
+            try {
+                const response = await fetch("/api/ai/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        text: text,
+                        number_of_cards: numberOfCards
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to generate flashcards.");
+                }
+                if (!data.cards || !Array.isArray(data.cards)) {
+                    throw new Error("Invalid response received from AI.");
+                }
+                displayCards(data.cards);
+            } catch (err) {
+                console.error(err);
+                error.textContent = err.message || "Something went wrong while generating flashcards.";
+                error.style.display = "block";
+            } finally {
+                loading.style.display = "none";
+                generateButton.disabled = false;
+                generateButton.innerHTML = "<i data-lucide='sparkles'></i> Generate Flashcards";
+                lucide.createIcons();
+            }
+        }
+        function displayCards(cards) {
+            if (!cards.length) {
+                cardsContainer.innerHTML = `
+                    <div class="card-panel" style="text-align:center; padding:var(--space-3xl); color:var(--color-text-muted);">
+                        <div style="font-size:3rem; margin-bottom:var(--space-md); opacity:0.5;">📭</div>
+                        <p>No flashcards were generated.</p>
+                    </div>
+                `;
+                resultsSection.style.display = "block";
+                return;
+            }
+            resultCount.textContent = `${cards.length} ${cards.length === 1 ? "card" : "cards"}`;
+            cardsContainer.innerHTML = cards.map((card, index) => {
+                const difficulty = String(card.difficulty || "medium").toLowerCase();
+                let badgeClass = "badge-warning";
+                if (difficulty === "easy") badgeClass = "badge-success";
+                if (difficulty === "hard") badgeClass = "badge-danger";
+                return `
+                    <div class="card-panel" style="padding:var(--space-xl);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-lg);">
+                            <span style="font-size:var(--font-size-xs); font-weight:700; color:var(--color-text-muted); letter-spacing:0.05em;">
+                                CARD ${String(index + 1).padStart(2, "0")}
+                            </span>
+                            <span class="badge ${badgeClass}" style="text-transform:uppercase;">${escapeHtml(difficulty)}</span>
+                        </div>
+                        <div style="font-size:var(--font-size-xs); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; color:var(--color-text-muted); margin-bottom:var(--space-xs);">Question</div>
+                        <div style="font-size:var(--font-size-lg); font-weight:600; color:var(--color-text-primary); margin-bottom:var(--space-xl); line-height:1.5;">
+                            ${escapeHtml(card.question || "")}
+                        </div>
+                        <div style="background:var(--color-bg-secondary); border-left:3px solid var(--color-accent); border-radius:0 var(--radius-md) var(--radius-md) 0; padding:var(--space-md) var(--space-lg);">
+                            <div style="font-size:var(--font-size-xs); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; color:var(--color-accent); margin-bottom:var(--space-xs);">Answer</div>
+                            <div style="font-size:var(--font-size-sm); line-height:1.6; color:var(--color-text-secondary);">
+                                ${escapeHtml(card.answer || "")}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+            resultsSection.style.display = "block";
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+        }
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+    <script src="/static/js/app.js?v=2"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
+
+</html>

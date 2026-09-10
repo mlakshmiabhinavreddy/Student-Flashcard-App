@@ -83,12 +83,12 @@ const MockExam = (() => {
             for (const deck of readyDecks) {
                 html += `
                     <div class="picker-deck-card" onclick="MockExam.selectDeck(${deck.id})">
-                        <div class="picker-deck-info" style="flex:1;">
-                            <div style="font-weight:600; font-size:var(--font-size-base); margin-bottom:2px;">${escapeHtml(deck.name)}</div>
+                        <div class="picker-deck-info">
+                            <div class="picker-deck-name" title="${escapeHtml(deck.name)}">${escapeHtml(deck.name)}</div>
                             <div style="font-size:var(--font-size-xs); color:var(--color-text-muted);">${deck.subject ? escapeHtml(deck.subject) : "General"}</div>
                             <div style="font-size:var(--font-size-xs); margin-top:4px;">🃏 ${deck.card_count} cards</div>
                         </div>
-                        <button class="btn btn-primary btn-sm">
+                        <button class="btn btn-primary btn-sm" style="flex-shrink: 0;">
                             📝 Select for Exam
                         </button>
                     </div>

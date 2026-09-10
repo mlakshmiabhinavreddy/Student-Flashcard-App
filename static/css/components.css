@@ -249,6 +249,19 @@ select.form-input {
     margin-top: var(--space-xl);
 }
 
+/* ── Generate AI Modal ────────────────────────────────────── */
+.generate-modal { text-align: center; max-width: 440px; padding-top: var(--space-2xl); }
+.generate-modal-icon { width: 56px; height: 56px; margin: 0 auto var(--space-md); border-radius: var(--radius-lg); background: var(--color-accent-subtle); color: var(--color-accent); display: flex; align-items: center; justify-content: center; }
+.generate-modal-icon svg { width: 28px; height: 28px; }
+.generate-modal .modal-title { justify-content: center; margin-bottom: var(--space-xs); font-size: var(--font-size-xl); }
+.generate-modal-file { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--space-lg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.generate-modal-topics { font-size: var(--font-size-sm); background: var(--color-bg-primary); padding: var(--space-md); border-radius: var(--radius-md); border: var(--border-subtle); color: var(--color-text-secondary); text-align: left; max-height: 120px; overflow-y: auto; margin-bottom: var(--space-lg); line-height: 1.5; }
+.generate-count-group { text-align: left; margin-bottom: var(--space-lg); }
+.generate-count-badge { float: right; font-weight: 700; color: var(--color-accent); }
+.generate-count-slider { width: 100%; margin-top: var(--space-sm); accent-color: var(--color-accent); cursor: pointer; }
+.generate-count-labels { display: flex; justify-content: space-between; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 4px; }
+.generate-error { color: var(--color-danger); background: var(--color-danger-glow); padding: var(--space-sm); border-radius: var(--radius-md); font-size: var(--font-size-sm); text-align: left; margin-bottom: var(--space-lg); }
+
 /* ── Tables ──────────────────────────────────────────────── */
 .table-wrap {
     width: 100%;
