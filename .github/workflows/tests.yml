@@ -32,6 +32,7 @@ jobs:
           echo "SECRET_KEY=test-secret-key-for-ci" >> $GITHUB_ENV
           echo "FLASK_ENV=testing" >> $GITHUB_ENV
           echo "FLASK_DEBUG=0" >> $GITHUB_ENV
+          echo "GEMINI_API_KEY=dummy-test-key-for-ci" >> $GITHUB_ENV
 
       - name: Run database tests
         run: |
