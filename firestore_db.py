@@ -512,6 +512,24 @@ def submit_mock_exam(
             if is_correct:
                 correct += 1
 
+                # Track correct answer on the card
+                card_ref = (
+                    db.collection("cards")
+                    .document(str(q["card_id"]))
+                )
+
+                c_doc = card_ref.get()
+
+                if c_doc.exists:
+                    c = c_doc.to_dict()
+
+                    card_ref.update({
+                        "attempts":
+                            c.get("attempts", 0) + 1,
+                        "correct_count":
+                            c.get("correct_count", 0) + 1
+                    })
+
             else:
                 incorrect += 1
 

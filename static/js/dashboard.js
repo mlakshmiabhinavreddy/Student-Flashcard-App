@@ -240,6 +240,12 @@ const Dashboard = (() => {
                     : []
             );
 
+            populateDeckSelector(
+                Array.isArray(data.decks)
+                    ? data.decks
+                    : []
+            );
+
 
             console.log(
                 "[DASHBOARD] Rendering completed."
@@ -720,8 +726,8 @@ const Dashboard = (() => {
                 ? `
                     <span class="text-muted">
                         ${escapeHtml(
-                            deck.description
-                        )}
+                    deck.description
+                )}
                     </span>
                 `
                 : "";
@@ -768,9 +774,9 @@ const Dashboard = (() => {
                             sessionStorage.setItem(
                                 'preselect_deck',
                                 '${deckId.replace(
-                                    /'/g,
-                                    "\\'"
-                                )}'
+                    /'/g,
+                    "\\'"
+                )}'
                             );
                         "
                     >
@@ -802,9 +808,9 @@ const Dashboard = (() => {
                             class="dashboard-deck-name"
                         >
                             ${escapeHtml(
-                                deck.name ||
-                                "Untitled Deck"
-                            )}
+            deck.name ||
+            "Untitled Deck"
+        )}
                         </h3>
 
 
@@ -960,8 +966,8 @@ const Dashboard = (() => {
 
                     <a
                         href="/deck/${encodeURIComponent(
-                            deckId
-                        )}"
+            deckId
+        )}"
                         class="btn btn-ghost btn-sm"
                     >
                         View Deck
@@ -1084,8 +1090,8 @@ const Dashboard = (() => {
                                     class="weak-area-name"
                                 >
                                     ${escapeHtml(
-                                        subject.subject
-                                    )}
+                        subject.subject
+                    )}
                                 </div>
 
 
@@ -1103,8 +1109,8 @@ const Dashboard = (() => {
                             >
                                 Avg
                                 ${Number(
-                                    subject.avg_score || 0
-                                ).toFixed(1)}%
+                        subject.avg_score || 0
+                    ).toFixed(1)}%
                             </span>
 
                         </div>
@@ -1151,8 +1157,8 @@ const Dashboard = (() => {
                                     class="weak-area-name"
                                 >
                                     ${escapeHtml(
-                                        shortQuestion
-                                    )}
+                        shortQuestion
+                    )}
                                 </div>
 
 
@@ -1160,9 +1166,9 @@ const Dashboard = (() => {
                                     class="weak-area-subject"
                                 >
                                     ${escapeHtml(
-                                        card.deck_name ||
-                                        ""
-                                    )}
+                        card.deck_name ||
+                        ""
+                    )}
                                 </div>
 
                             </div>
@@ -1172,8 +1178,8 @@ const Dashboard = (() => {
                                 class="weak-area-badge"
                             >
                                 ${Number(
-                                    card.accuracy || 0
-                                ).toFixed(1)}%
+                        card.accuracy || 0
+                    ).toFixed(1)}%
                             </span>
 
                         </div>
@@ -1357,8 +1363,8 @@ const Dashboard = (() => {
 
                     <a
                         href="/exam-result/${encodeURIComponent(
-                            exam.id
-                        )}"
+                    exam.id
+                )}"
                         class="recent-exam-item"
                     >
 
@@ -1368,9 +1374,9 @@ const Dashboard = (() => {
                                 class="recent-exam-name"
                             >
                                 ${escapeHtml(
-                                    exam.deck_name ||
-                                    "Mock Exam"
-                                )}
+                    exam.deck_name ||
+                    "Mock Exam"
+                )}
                             </div>
 
 
@@ -1378,14 +1384,14 @@ const Dashboard = (() => {
                                 class="recent-exam-date"
                             >
                                 ${escapeHtml(
-                                    date
-                                )}
+                    date
+                )}
 
                                 ·
 
                                 ${escapeHtml(
-                                    timeString
-                                )}
+                    timeString
+                )}
                             </div>
 
                         </div>
@@ -1921,8 +1927,8 @@ const Dashboard = (() => {
 
                 <a
                     href="${escapeHtml(
-                        studyUrl
-                    )}"
+                studyUrl
+            )}"
                     class="btn btn-success btn-sm"
                     style="
                         display:inline-flex;
@@ -1991,8 +1997,8 @@ const Dashboard = (() => {
                             "
                         >
                             ${escapeHtml(
-                                deckName
-                            )}
+            deckName
+        )}
                         </h3>
 
 
@@ -2004,8 +2010,8 @@ const Dashboard = (() => {
                             "
                         >
                             ${escapeHtml(
-                                recommendation
-                            )}
+            recommendation
+        )}
                         </p>
 
                     </div>
@@ -2071,13 +2077,13 @@ const Dashboard = (() => {
                         "
                     >
                         ${Number(
-                            best.correct_answers || 0
-                        )}
+            best.correct_answers || 0
+        )}
                         correct /
                         ${Number(
-                            best.total_attempts || 0
-                        )}
-                        attempts
+            best.total_attempts || 0
+        )}
+                        questions
                     </span>
 
 
@@ -2091,9 +2097,9 @@ const Dashboard = (() => {
                     >
                         Avg response:
                         ${Number(
-                            best.average_response_time ||
-                            0
-                        ).toFixed(2)}s
+            best.average_response_time ||
+            0
+        ).toFixed(2)}s
                     </span>
 
 
@@ -2103,6 +2109,143 @@ const Dashboard = (() => {
 
             </div>
         `;
+    }
+
+
+    // =========================================================
+    // AI FLASHCARD GENERATOR (Dashboard inline)
+    // =========================================================
+
+    let aiGeneratedCards = [];
+
+    function populateDeckSelector(decks) {
+        const select = document.getElementById("ai-gen-deck-select");
+        if (!select) return;
+
+        select.innerHTML = '<option value="">— Select a deck —</option>';
+        if (Array.isArray(decks)) {
+            decks.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d.id;
+                opt.textContent = d.name;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    async function generateAICards() {
+        const topic = document.getElementById("ai-gen-topic")?.value?.trim();
+        if (!topic) {
+            showToast("Please enter a topic first", "error");
+            return;
+        }
+
+        const btn = document.getElementById("ai-gen-btn");
+        const preview = document.getElementById("ai-gen-preview");
+        const cardsArea = document.getElementById("ai-gen-cards-area");
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;"></span> Generating...';
+
+        try {
+            const res = await fetch("/api/ai/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: topic, number_of_cards: 5 })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || "AI generation failed");
+            }
+
+            aiGeneratedCards = data.cards || [];
+
+            if (aiGeneratedCards.length === 0) {
+                showToast("No cards generated. Try a different topic.", "info");
+                btn.innerHTML = '<i data-lucide="sparkles"></i> Generate';
+                btn.disabled = false;
+                if (typeof lucide !== "undefined") lucide.createIcons();
+                return;
+            }
+
+            // Render mini flip cards
+            cardsArea.innerHTML = aiGeneratedCards.map((card, i) => `
+                <div class="ai-gen-mini-card" onclick="this.classList.toggle('flipped')" tabindex="0" role="button">
+                    <div class="ai-gen-mini-inner">
+                        <div class="ai-gen-mini-front">
+                            <span class="ai-gen-mini-tag">Q${i + 1}</span>
+                            <span>${escapeHtml(card.question)}</span>
+                        </div>
+                        <div class="ai-gen-mini-back">
+                            <span class="ai-gen-mini-tag ai-gen-mini-tag--answer">A${i + 1}</span>
+                            <span>${escapeHtml(card.answer)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+
+            preview.style.display = "block";
+            showToast(`✨ Generated ${aiGeneratedCards.length} flashcards!`, "success");
+
+        } catch (err) {
+            console.error("[AI-GEN]", err);
+            showToast(err.message || "Failed to generate cards", "error");
+        }
+
+        btn.innerHTML = '<i data-lucide="sparkles"></i> Generate';
+        btn.disabled = false;
+        if (typeof lucide !== "undefined") lucide.createIcons();
+    }
+
+    async function addAICardsToDeck() {
+        const select = document.getElementById("ai-gen-deck-select");
+        const deckId = select?.value;
+
+        if (!deckId) {
+            showToast("Please select a deck first", "error");
+            return;
+        }
+
+        if (aiGeneratedCards.length === 0) {
+            showToast("No cards to add", "error");
+            return;
+        }
+
+        const addBtn = document.getElementById("ai-gen-add-btn");
+        addBtn.disabled = true;
+        addBtn.textContent = "Adding...";
+
+        let added = 0;
+        for (const card of aiGeneratedCards) {
+            try {
+                const res = await fetch(`/api/decks/${deckId}/cards`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question: card.question,
+                        answer: card.answer
+                    })
+                });
+                if (res.ok) added++;
+            } catch (e) {
+                console.error("[AI-GEN] Add card error:", e);
+            }
+        }
+
+        showToast(`✅ Added ${added} cards to deck!`, "success");
+        aiGeneratedCards = [];
+
+        document.getElementById("ai-gen-preview").style.display = "none";
+        document.getElementById("ai-gen-topic").value = "";
+
+        addBtn.innerHTML = '<i data-lucide="plus-circle"></i> Add to Deck';
+        addBtn.disabled = false;
+        if (typeof lucide !== "undefined") lucide.createIcons();
+
+        // Refresh dashboard data
+        load();
     }
 
 
@@ -2117,7 +2260,9 @@ const Dashboard = (() => {
 
 
     return {
-        load
+        load,
+        generateAICards,
+        addAICardsToDeck
     };
 
 })();

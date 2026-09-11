@@ -20,7 +20,6 @@
 
 <body>
     <div class="app-container">
-
         <!-- ── Sidebar Navigation ──────────────────────────── -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -61,7 +60,6 @@
                 </a>
             </div>
         </nav>
-
         <!-- ── Mobile top bar ──────────────────────────────── -->
         <div class="mobile-topbar">
             <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
@@ -70,10 +68,8 @@
             <span class="mobile-brand"><i data-lucide="zap"></i> STUDYFLIP</span>
             <a href="/logout" class="mobile-logout"><i data-lucide="log-out"></i></a>
         </div>
-
         <!-- ── Main Content ────────────────────────────────── -->
         <main class="main-content" id="app-main">
-
             <!-- Welcome header -->
             <div class="page-header">
                 <div>
@@ -85,7 +81,6 @@
                     <a href="/decks" class="btn btn-ghost">+ New Deck</a>
                 </div>
             </div>
-
             <!-- Stats Grid -->
             <div id="stats-grid" class="stats-grid stats-grid--6">
                 <div class="stat-card stat-card--accent">
@@ -119,29 +114,53 @@
                     <div class="stat-label">Overall Accuracy</div>
                 </div>
             </div>
-
             <!-- Two-column layout -->
             <div class="dashboard-grid">
-
                 <!-- Left column: Decks progress -->
                 <div class="dashboard-left">
-                    <div class="ai-generator-card">
+                    <div class="ai-generator-card" id="ai-gen-card">
                         <div class="ai-generator-icon"><i data-lucide="bot"></i></div>
-
                         <div class="ai-generator-content">
                             <h2>AI Flashcard Generator</h2>
-
-                            <p>
+                            <p id="ai-gen-desc">
                                 Generate smart flashcards automatically
                                 from your study material using AI.
                             </p>
 
-                            <a href="/ai-generator" class="ai-generator-button">
-                                Generate Flashcards
-                            </a>
+                            <!-- Input form -->
+                            <div id="ai-gen-form"
+                                style="display:flex; flex-direction:column; gap:0.75rem; margin-top:0.75rem;">
+                                <input type="text" id="ai-gen-topic" class="form-input"
+                                    placeholder="Enter a topic (e.g. Photosynthesis, World War II...)"
+                                    style="background:rgba(0,0,0,0.25); border:var(--border-subtle); font-size:0.9rem;">
+                                <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                                    <button class="ai-generator-button" id="ai-gen-btn"
+                                        onclick="Dashboard.generateAICards()">
+                                        <i data-lucide="sparkles"></i> Generate
+                                    </button>
+                                    <a href="/ai-generator" class="btn btn-ghost btn-sm" style="font-size:0.8rem;">
+                                        <i data-lucide="external-link"></i> Full Generator
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Generated cards preview -->
+                            <div id="ai-gen-preview" style="display:none; margin-top:1rem;">
+                                <div id="ai-gen-cards-area" style="display:flex; flex-direction:column; gap:0.75rem;">
+                                </div>
+                                <div
+                                    style="margin-top:1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                                    <select id="ai-gen-deck-select" class="form-input"
+                                        style="max-width:220px; background:rgba(0,0,0,0.25); border:var(--border-subtle); font-size:0.85rem;">
+                                        <option value="">— Select a deck —</option>
+                                    </select>
+                                    <button class="btn btn-success btn-sm" id="ai-gen-add-btn"
+                                        onclick="Dashboard.addAICardsToDeck()">
+                                        <i data-lucide="plus-circle"></i> Add to Deck
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
                     <!-- Smart Review Banner -->
                     <div class="smart-review-card card-panel" id="smart-review-banner">
                         <div class="smart-review-content">
@@ -166,7 +185,6 @@
                             </a>
                         </div>
                     </div>
-
                     <!-- Deck progress cards -->
                     <div class="section-header">
                         <h2>Continue Studying</h2>
@@ -179,10 +197,8 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Right column: Weak areas + Recent activity -->
                 <div class="dashboard-right">
-
                     <!-- Mock Exam CTA -->
                     <div class="card-panel exam-cta-card">
                         <div class="exam-cta-icon"><i data-lucide="edit-3"></i></div>
@@ -190,7 +206,6 @@
                         <p>Test your knowledge with a timed mock exam.</p>
                         <a href="/mock-exam" class="btn btn-primary btn-full">Take Mock Exam</a>
                     </div>
-
                     <!-- Weak Areas -->
                     <div class="section-header">
                         <h2><i data-lucide="alert-triangle"></i> Weak Areas</h2>
@@ -201,7 +216,6 @@
                             <p>Analyzing performance...</p>
                         </div>
                     </div>
-
                     <!-- Recent Activity -->
                     <div class="section-header">
                         <h2>📅 Recent Exams</h2>
@@ -215,13 +229,9 @@
                     </div>
                 </div>
             </div>
-
         </main>
-
         <div id="toast-container" class="toast-container"></div>
-
         <script src="/static/js/dashboard.js"></script>
-
         <script src="/static/js/app.js?v=2"></script>
         <script>lucide.createIcons();</script>
     </div>

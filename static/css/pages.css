@@ -111,10 +111,10 @@
     padding: var(--space-md) var(--space-lg);
     display: flex;
     gap: var(--space-md);
-    align-items: center;
+    align-items: flex-start;
 }
-.ai-generator-icon { color: var(--color-accent); flex-shrink: 0; opacity: 0.8; }
-.ai-generator-content { flex: 1; }
+.ai-generator-icon { color: var(--color-accent); flex-shrink: 0; opacity: 0.8; margin-top: 2px; }
+.ai-generator-content { flex: 1; min-width: 0; }
 .ai-generator-content h2 { font-size: var(--font-size-sm); font-weight: 600; margin-bottom: 2px; }
 .ai-generator-content p  { color: var(--color-text-muted); font-size: var(--font-size-xs); }
 .ai-generator-button {
@@ -124,8 +124,64 @@
     text-decoration: none; font-weight: 500; font-size: var(--font-size-xs);
     white-space: nowrap; flex-shrink: 0;
     transition: background var(--transition-fast);
+    border: none; cursor: pointer;
 }
 .ai-generator-button:hover { background: var(--color-accent-hover); color: white; }
+.ai-generator-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── AI Generator Mini Flip Cards ──────────────────────────── */
+.ai-gen-mini-card {
+    perspective: 600px;
+    cursor: pointer;
+    min-height: 56px;
+}
+.ai-gen-mini-inner {
+    position: relative;
+    width: 100%;
+    min-height: 56px;
+    transition: transform 0.45s ease;
+    transform-style: preserve-3d;
+}
+.ai-gen-mini-card.flipped .ai-gen-mini-inner {
+    transform: rotateX(180deg);
+}
+.ai-gen-mini-front,
+.ai-gen-mini-back {
+    position: absolute; top: 0; left: 0; width: 100%;
+    min-height: 56px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius-md);
+    padding: 0.6rem 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+}
+.ai-gen-mini-front {
+    background: rgba(108, 99, 255, 0.08);
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    color: var(--color-text-primary);
+}
+.ai-gen-mini-back {
+    background: rgba(52, 199, 89, 0.08);
+    border: 1px solid rgba(52, 199, 89, 0.18);
+    color: var(--color-text-primary);
+    transform: rotateX(180deg);
+}
+.ai-gen-mini-tag {
+    background: var(--color-accent);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+.ai-gen-mini-tag--answer {
+    background: var(--color-success);
+}
 
 .smart-review-card {
     background: var(--color-bg-card);
@@ -451,11 +507,18 @@
 
 .exam-nav { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); }
 .exam-nav-center { flex: 1; display: flex; justify-content: center; }
-.exam-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 360px; }
-.exam-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-bg-elevated); border: 1px solid rgba(255,255,255,0.1); transition: all var(--transition-fast); }
-.exam-dot.answered { background: var(--color-accent); border-color: var(--color-accent); }
-.exam-dot.known    { background: var(--color-warning); border-color: var(--color-warning); }
-.exam-dot.current  { background: var(--color-danger); border-color: var(--color-danger); }
+.exam-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 480px; }
+.exam-dot {
+    width: 28px; height: 28px; border-radius: var(--radius-sm);
+    background: var(--color-bg-elevated); border: 1px solid rgba(255,255,255,0.1);
+    transition: all var(--transition-fast); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 600; color: var(--color-text-muted);
+}
+.exam-dot:hover { border-color: rgba(255,255,255,0.25); background: var(--color-bg-glass); }
+.exam-dot.answered { background: var(--color-accent); border-color: var(--color-accent); color: white; }
+.exam-dot.known    { background: var(--color-warning); border-color: var(--color-warning); color: #1a1a2e; }
+.exam-dot.current  { background: var(--color-danger); border-color: var(--color-danger); color: white; box-shadow: 0 0 8px rgba(255,59,48,0.4); }
 
 .exam-dot-legend { display: flex; gap: var(--space-lg); justify-content: center; margin-top: var(--space-sm); flex-wrap: wrap; }
 .exam-dot-legend-item { display: flex; align-items: center; gap: 4px; font-size: var(--font-size-xs); color: var(--color-text-muted); }
